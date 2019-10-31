@@ -20,9 +20,11 @@ float			{digit}*\.{digit}+
 "end"				{return (END);}
 "if"				{return (IF);}
 "then"				{return (THEN);}
+"elif"				{return (ELIF);}
 "else"				{return (ELSE);}
 "nop"				{return (NOP);}
 "while"				{return (WHILE);}
+"for"				{return (FOR);}
 "return"			{return (RETURN);}
 "print"				{return (PRINT);}
 "in"				{return (IN);}

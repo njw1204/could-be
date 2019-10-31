@@ -4,7 +4,7 @@ int yylex();
 int yyerror(char *s);
 %}
 
-%token MAINPROG FUNCTION PROCEDURE BEGIN END IF THEN ELSE NOP WHILE RETURN PRINT IN ID INTEGER FLOAT OTHER
+%token MAINPROG FUNCTION PROCEDURE BEGIN END IF THEN ELIF ELSE NOP WHILE FOR RETURN PRINT IN ID INTEGER FLOAT OTHER
 %token OP_PLUS OP_MINUS OP_MULT OP_DIV OP_LT OP_GT OP_NE OP_LE OP_GE OP_EQ OP_NOT
 %token DE_SEMICOLON DE_COMMA DE_DOT DE_ASSIGN DE_LP DE_RP DE_LSB DE_RSB DE_COLON
 
@@ -41,7 +41,7 @@ type:
 	| standard_type DE_LSB INTEGER DE_RSB {}
 ;
 standard_type:
-	INT {}
+	INTERGER {}
 	| FLOAT {}
 ;
 
@@ -72,7 +72,7 @@ compound_statement:
 ;
 statement_list:
 	statement {}
-	| statement DE_SEMECOLON statement_list {}
+	| statement DE_SEMICOLON statement_list {}
 ;
 statement:
 	variable DE_ASSIGN expression {}
@@ -149,7 +149,7 @@ term:
 	| factor multop term {}
 ;
 factor:
-	INT {}
+	INTERGER {}
 	| FLOAT {}
 	| variable {}
 	| procedure_statement {}
