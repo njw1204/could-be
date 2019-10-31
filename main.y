@@ -8,10 +8,7 @@ int yyerror(char *s);
 %token OP_PLUS OP_MINUS OP_MULT OP_DIV OP_LT OP_GT OP_NE OP_LE OP_GE OP_EQ OP_NOT
 %token DE_SEMICOLON DE_COMMA DE_DOT DE_ASSIGN DE_LP DE_RP DE_LSB DE_RSB DE_COLON
 
-
-%left MAINPROG FUNCTION PROCEDURE BEGIN END IF THEN ELIF ELSE NOP WHILE FOR RETURN PRINT IN ID INTEGER FLOAT OTHER
-%left OP_PLUS OP_MINUS OP_MULT OP_DIV OP_LT OP_GT OP_NE OP_LE OP_GE OP_EQ OP_NOT
-%left DE_SEMICOLON DE_COMMA DE_DOT DE_ASSIGN DE_LP DE_RP DE_LSB DE_RSB DE_COLON
+%right DE_COLON ELSE
 
 %type <name> ID
 %type <intData> INTEGER
@@ -92,7 +89,7 @@ statement:
 
 
 if_statement:
-	IF expression DE_COLON statement elif_statement {}
+	| IF expression DE_COLON statement elif_statement {}
 	| IF expression DE_COLON statement elif_statement ELSE DE_COLON statement {}
 ;
 elif_statement:
