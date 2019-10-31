@@ -188,7 +188,7 @@ multop:
 %%
 
 int yyerror(char *s) {
-	printf("Syntax Error: %s\n", s);
+	printf("Error: %s at line %d\n", s, yylineno);
 	return 0;
 }
 
