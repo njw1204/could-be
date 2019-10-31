@@ -7,8 +7,6 @@ void showError();
 
 letter			[a-zA-Z]
 digit			[0-9]
-operator		\+|\-|\*|\/|\<|\<\=|\>\=|\>|\=\=|\!\=|\!
-delimiter		;|\.|,|\=|\(|\)|\[|\]|:
 id				{letter}({letter}|{digit})*
 integer			{digit}+
 float			{digit}*\.{digit}+
@@ -31,10 +29,48 @@ float			{digit}*\.{digit}+
 {id}				{sscanf(yytext, "%s", yylval.name); return (ID);}
 {integer}			{yylval.intData = atoi(yytext); return (INTEGER);}
 {float}				{yylval.floatData = atof(yytext); return (FLOAT);}
-{operator}			{sscanf(yytext, "%s", yylval.name); return (OPERATOR);}
-{delimiter}			{sscanf(yytext, "%s", yylval.name); return (DELIMITER);}
 [ \t\n\r]+			{}
 .					{showError(); return(OTHER);}
+"mainprog"			{return (MAINPROG);}
+"function"			{return (FUNCTION);}
+"procedure"			{return (PROCEDURE);}
+"begin"				{return (BEGIN);}
+"end"				{return (END);}
+"if"				{return (IF);}
+"then"				{return (THEN);}
+"else"				{return (ELSE);}
+"nop"				{return (NOP);}
+"while"				{return (WHILE);}
+"return"			{return (RETURN);}
+"print"				{return (PRINT);}
+"in"				{return (IN);}
+{id}				{sscanf(yytext, "%s", yylval.name); return (ID);}
+{integer}			{yylval.intData = atoi(yytext); return (INTEGER);}
+{float}				{yylval.floatData = atof(yytext); return (FLOAT);}
+[ \t\n\r]+			{}
+.					{showError(); return(OTHER);}
+
+"+"                 {return (OP_PLUS);}
+"-"					{return (OP_MINUS);}
+"*"					{return (OP_MULT);}
+"/"					{return (OP_DIV);}
+"<"					{return (OP_LT);}
+">"					{return (OP_GT);}
+"!="				{return (OP_NE);}
+"<="				{return (OP_LE);}
+">="				{return (OP_GE);}
+"=="				{return (OP_EQ);}
+"!"					{return (OP_NOT);}
+
+";"					{return (DE_SEMICOLON);}
+","					{return (DE_COMMA);}
+"."					{return (DE_DOT);}
+"="					{return (DE_EQUAL);}
+"("					{return (DE_LP);}
+")"					{return (DE_RP);}
+"["					{return (DE_LSB);}
+"]"					{return (DE_RSB);}
+":"					{return (DE_COLON);}
 
 %%
 
