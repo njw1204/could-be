@@ -46,7 +46,7 @@ float			{digit}*\.{digit}+
 ";"					{return (DE_SEMICOLON);}
 ","					{return (DE_COMMA);}
 "."					{return (DE_DOT);}
-"="					{return (DE_EQUAL);}
+"="					{return (DE_ASSIGN);}
 "("					{return (DE_LP);}
 ")"					{return (DE_RP);}
 "["					{return (DE_LSB);}
