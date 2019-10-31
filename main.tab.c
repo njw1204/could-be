@@ -106,8 +106,8 @@ int yyerror(char *s);
      MAINPROG = 258,
      FUNCTION = 259,
      PROCEDURE = 260,
-     BEGIN = 261,
-     END = 262,
+     BEGIN_BODY = 261,
+     END_BODY = 262,
      IF = 263,
      THEN = 264,
      ELIF = 265,
@@ -507,19 +507,19 @@ static const yytype_uint8 yyrline[] =
 static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "MAINPROG", "FUNCTION", "PROCEDURE",
-  "BEGIN", "END", "IF", "THEN", "ELIF", "ELSE", "NOP", "WHILE", "FOR",
-  "RETURN", "PRINT", "IN", "ID", "INTEGER", "FLOAT", "OTHER", "OP_PLUS",
-  "OP_MINUS", "OP_MULT", "OP_DIV", "OP_LT", "OP_GT", "OP_NE", "OP_LE",
-  "OP_GE", "OP_EQ", "OP_NOT", "DE_SEMICOLON", "DE_COMMA", "DE_DOT",
-  "DE_ASSIGN", "DE_LP", "DE_RP", "DE_LSB", "DE_RSB", "DE_COLON", "$accept",
-  "program", "declarations", "identifier_list", "type", "standard_type",
-  "subprogram_declarations", "subprogram_declaration", "subprogram_head",
-  "arguments", "parameter_list", "compound_statement", "statement_list",
-  "statement", "if_statement", "elif_statement", "while_statement",
-  "for_statement", "print_statement", "variable", "procedure_statement",
-  "actual_parameter_expression", "expression_list", "expression",
-  "in_expression", "simple_expression", "term", "factor", "sign", "relop",
-  "addop", "multop", 0
+  "BEGIN_BODY", "END_BODY", "IF", "THEN", "ELIF", "ELSE", "NOP", "WHILE",
+  "FOR", "RETURN", "PRINT", "IN", "ID", "INTEGER", "FLOAT", "OTHER",
+  "OP_PLUS", "OP_MINUS", "OP_MULT", "OP_DIV", "OP_LT", "OP_GT", "OP_NE",
+  "OP_LE", "OP_GE", "OP_EQ", "OP_NOT", "DE_SEMICOLON", "DE_COMMA",
+  "DE_DOT", "DE_ASSIGN", "DE_LP", "DE_RP", "DE_LSB", "DE_RSB", "DE_COLON",
+  "$accept", "program", "declarations", "identifier_list", "type",
+  "standard_type", "subprogram_declarations", "subprogram_declaration",
+  "subprogram_head", "arguments", "parameter_list", "compound_statement",
+  "statement_list", "statement", "if_statement", "elif_statement",
+  "while_statement", "for_statement", "print_statement", "variable",
+  "procedure_statement", "actual_parameter_expression", "expression_list",
+  "expression", "in_expression", "simple_expression", "term", "factor",
+  "sign", "relop", "addop", "multop", 0
 };
 #endif
 
@@ -2193,7 +2193,7 @@ yyreturn:
 
 
 int yyerror(char *s) {
-	printf("Syntax Error at line %s\n", s);
+	printf("Syntax Error: %s\n", s);
 	return 0;
 }
 

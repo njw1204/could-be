@@ -37,7 +37,7 @@ Grammar
    17 parameter_list: identifier_list DE_COLON type
    18               | identifier_list DE_COLON type DE_SEMICOLON
 
-   19 compound_statement: BEGIN statement_list END
+   19 compound_statement: BEGIN_BODY statement_list END_BODY
 
    20 statement_list: statement
    21               | statement DE_SEMICOLON statement_list
@@ -123,8 +123,8 @@ error (256)
 MAINPROG (258) 1
 FUNCTION (259) 13
 PROCEDURE (260) 14
-BEGIN (261) 19
-END (262) 19
+BEGIN_BODY (261) 19
+END_BODY (262) 19
 IF (263) 31 32 33 34
 THEN (264)
 ELIF (265) 35 36
@@ -347,7 +347,7 @@ state 13
 
     1 program: MAINPROG ID DE_SEMICOLON declarations subprogram_declarations . compound_statement
 
-    BEGIN  shift, and go to state 21
+    BEGIN_BODY  shift, and go to state 21
 
     compound_statement  go to state 22
 
@@ -428,16 +428,16 @@ state 20
 
 state 21
 
-   19 compound_statement: BEGIN . statement_list END
+   19 compound_statement: BEGIN_BODY . statement_list END_BODY
 
-    BEGIN   shift, and go to state 21
-    IF      shift, and go to state 31
-    NOP     shift, and go to state 32
-    WHILE   shift, and go to state 33
-    FOR     shift, and go to state 34
-    RETURN  shift, and go to state 35
-    PRINT   shift, and go to state 36
-    ID      shift, and go to state 37
+    BEGIN_BODY  shift, and go to state 21
+    IF          shift, and go to state 31
+    NOP         shift, and go to state 32
+    WHILE       shift, and go to state 33
+    FOR         shift, and go to state 34
+    RETURN      shift, and go to state 35
+    PRINT       shift, and go to state 36
+    ID          shift, and go to state 37
 
     compound_statement   go to state 38
     statement_list       go to state 39
@@ -468,7 +468,7 @@ state 24
 
    12 subprogram_declaration: subprogram_head declarations . compound_statement
 
-    BEGIN  shift, and go to state 21
+    BEGIN_BODY  shift, and go to state 21
 
     compound_statement  go to state 47
 
@@ -653,9 +653,9 @@ state 38
 
 state 39
 
-   19 compound_statement: BEGIN statement_list . END
+   19 compound_statement: BEGIN_BODY statement_list . END_BODY
 
-    END  shift, and go to state 75
+    END_BODY  shift, and go to state 75
 
 
 state 40
@@ -1007,7 +1007,7 @@ state 74
 
 state 75
 
-   19 compound_statement: BEGIN statement_list END .
+   19 compound_statement: BEGIN_BODY statement_list END_BODY .
 
     $default  reduce using rule 19 (compound_statement)
 
@@ -1016,14 +1016,14 @@ state 76
 
    21 statement_list: statement DE_SEMICOLON . statement_list
 
-    BEGIN   shift, and go to state 21
-    IF      shift, and go to state 31
-    NOP     shift, and go to state 32
-    WHILE   shift, and go to state 33
-    FOR     shift, and go to state 34
-    RETURN  shift, and go to state 35
-    PRINT   shift, and go to state 36
-    ID      shift, and go to state 37
+    BEGIN_BODY  shift, and go to state 21
+    IF          shift, and go to state 31
+    NOP         shift, and go to state 32
+    WHILE       shift, and go to state 33
+    FOR         shift, and go to state 34
+    RETURN      shift, and go to state 35
+    PRINT       shift, and go to state 36
+    ID          shift, and go to state 37
 
     compound_statement   go to state 38
     statement_list       go to state 105
@@ -1097,14 +1097,14 @@ state 82
    33             | IF expression DE_COLON . statement elif_statement
    34             | IF expression DE_COLON . statement elif_statement ELSE DE_COLON statement
 
-    BEGIN   shift, and go to state 21
-    IF      shift, and go to state 31
-    NOP     shift, and go to state 32
-    WHILE   shift, and go to state 33
-    FOR     shift, and go to state 34
-    RETURN  shift, and go to state 35
-    PRINT   shift, and go to state 36
-    ID      shift, and go to state 37
+    BEGIN_BODY  shift, and go to state 21
+    IF          shift, and go to state 31
+    NOP         shift, and go to state 32
+    WHILE       shift, and go to state 33
+    FOR         shift, and go to state 34
+    RETURN      shift, and go to state 35
+    PRINT       shift, and go to state 36
+    ID          shift, and go to state 37
 
     compound_statement   go to state 38
     statement            go to state 109
@@ -1273,14 +1273,14 @@ state 98
    37 while_statement: WHILE expression DE_COLON . statement
    38                | WHILE expression DE_COLON . statement ELSE DE_COLON statement
 
-    BEGIN   shift, and go to state 21
-    IF      shift, and go to state 31
-    NOP     shift, and go to state 32
-    WHILE   shift, and go to state 33
-    FOR     shift, and go to state 34
-    RETURN  shift, and go to state 35
-    PRINT   shift, and go to state 36
-    ID      shift, and go to state 37
+    BEGIN_BODY  shift, and go to state 21
+    IF          shift, and go to state 31
+    NOP         shift, and go to state 32
+    WHILE       shift, and go to state 33
+    FOR         shift, and go to state 34
+    RETURN      shift, and go to state 35
+    PRINT       shift, and go to state 36
+    ID          shift, and go to state 37
 
     compound_statement   go to state 38
     statement            go to state 114
@@ -1297,14 +1297,14 @@ state 99
    39 for_statement: FOR in_expression DE_COLON . statement
    40              | FOR in_expression DE_COLON . statement ELSE DE_COLON statement
 
-    BEGIN   shift, and go to state 21
-    IF      shift, and go to state 31
-    NOP     shift, and go to state 32
-    WHILE   shift, and go to state 33
-    FOR     shift, and go to state 34
-    RETURN  shift, and go to state 35
-    PRINT   shift, and go to state 36
-    ID      shift, and go to state 37
+    BEGIN_BODY  shift, and go to state 21
+    IF          shift, and go to state 31
+    NOP         shift, and go to state 32
+    WHILE       shift, and go to state 33
+    FOR         shift, and go to state 34
+    RETURN      shift, and go to state 35
+    PRINT       shift, and go to state 36
+    ID          shift, and go to state 37
 
     compound_statement   go to state 38
     statement            go to state 115
@@ -1570,14 +1570,14 @@ state 128
 
    32 if_statement: IF expression DE_COLON statement ELSE DE_COLON . statement
 
-    BEGIN   shift, and go to state 21
-    IF      shift, and go to state 31
-    NOP     shift, and go to state 32
-    WHILE   shift, and go to state 33
-    FOR     shift, and go to state 34
-    RETURN  shift, and go to state 35
-    PRINT   shift, and go to state 36
-    ID      shift, and go to state 37
+    BEGIN_BODY  shift, and go to state 21
+    IF          shift, and go to state 31
+    NOP         shift, and go to state 32
+    WHILE       shift, and go to state 33
+    FOR         shift, and go to state 34
+    RETURN      shift, and go to state 35
+    PRINT       shift, and go to state 36
+    ID          shift, and go to state 37
 
     compound_statement   go to state 38
     statement            go to state 133
@@ -1600,14 +1600,14 @@ state 130
 
    38 while_statement: WHILE expression DE_COLON statement ELSE DE_COLON . statement
 
-    BEGIN   shift, and go to state 21
-    IF      shift, and go to state 31
-    NOP     shift, and go to state 32
-    WHILE   shift, and go to state 33
-    FOR     shift, and go to state 34
-    RETURN  shift, and go to state 35
-    PRINT   shift, and go to state 36
-    ID      shift, and go to state 37
+    BEGIN_BODY  shift, and go to state 21
+    IF          shift, and go to state 31
+    NOP         shift, and go to state 32
+    WHILE       shift, and go to state 33
+    FOR         shift, and go to state 34
+    RETURN      shift, and go to state 35
+    PRINT       shift, and go to state 36
+    ID          shift, and go to state 37
 
     compound_statement   go to state 38
     statement            go to state 135
@@ -1623,14 +1623,14 @@ state 131
 
    40 for_statement: FOR in_expression DE_COLON statement ELSE DE_COLON . statement
 
-    BEGIN   shift, and go to state 21
-    IF      shift, and go to state 31
-    NOP     shift, and go to state 32
-    WHILE   shift, and go to state 33
-    FOR     shift, and go to state 34
-    RETURN  shift, and go to state 35
-    PRINT   shift, and go to state 36
-    ID      shift, and go to state 37
+    BEGIN_BODY  shift, and go to state 21
+    IF          shift, and go to state 31
+    NOP         shift, and go to state 32
+    WHILE       shift, and go to state 33
+    FOR         shift, and go to state 34
+    RETURN      shift, and go to state 35
+    PRINT       shift, and go to state 36
+    ID          shift, and go to state 37
 
     compound_statement   go to state 38
     statement            go to state 136
@@ -1647,14 +1647,14 @@ state 132
    35 elif_statement: ELIF expression DE_COLON . statement elif_statement
    36               | ELIF expression DE_COLON . statement
 
-    BEGIN   shift, and go to state 21
-    IF      shift, and go to state 31
-    NOP     shift, and go to state 32
-    WHILE   shift, and go to state 33
-    FOR     shift, and go to state 34
-    RETURN  shift, and go to state 35
-    PRINT   shift, and go to state 36
-    ID      shift, and go to state 37
+    BEGIN_BODY  shift, and go to state 21
+    IF          shift, and go to state 31
+    NOP         shift, and go to state 32
+    WHILE       shift, and go to state 33
+    FOR         shift, and go to state 34
+    RETURN      shift, and go to state 35
+    PRINT       shift, and go to state 36
+    ID          shift, and go to state 37
 
     compound_statement   go to state 38
     statement            go to state 137
@@ -1677,14 +1677,14 @@ state 134
 
    34 if_statement: IF expression DE_COLON statement elif_statement ELSE DE_COLON . statement
 
-    BEGIN   shift, and go to state 21
-    IF      shift, and go to state 31
-    NOP     shift, and go to state 32
-    WHILE   shift, and go to state 33
-    FOR     shift, and go to state 34
-    RETURN  shift, and go to state 35
-    PRINT   shift, and go to state 36
-    ID      shift, and go to state 37
+    BEGIN_BODY  shift, and go to state 21
+    IF          shift, and go to state 31
+    NOP         shift, and go to state 32
+    WHILE       shift, and go to state 33
+    FOR         shift, and go to state 34
+    RETURN      shift, and go to state 35
+    PRINT       shift, and go to state 36
+    ID          shift, and go to state 37
 
     compound_statement   go to state 38
     statement            go to state 138
