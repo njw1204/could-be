@@ -41,7 +41,7 @@ type:
 	| standard_type DE_LSB INTEGER DE_RSB {}
 ;
 standard_type:
-	INTERGER {}
+	INTEGER {}
 	| FLOAT {}
 ;
 
@@ -149,7 +149,7 @@ term:
 	| factor multop term {}
 ;
 factor:
-	INTERGER {}
+	INTEGER {}
 	| FLOAT {}
 	| variable {}
 	| procedure_statement {}
