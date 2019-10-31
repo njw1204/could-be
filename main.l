@@ -30,6 +30,8 @@ float			{digit}*\.{digit}+
 "return"			{return (RETURN);}
 "print"				{return (PRINT);}
 "in"				{return (IN);}
+"int"				{return (TYPE_INT);}
+"float"				{return (TYPE_FLOAT);}
 
 {id}				{sscanf(yytext, "%s", yylval.name); return (ID);}
 {integer}			{yylval.intData = atoi(yytext); return (INTEGER);}

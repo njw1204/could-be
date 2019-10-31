@@ -54,30 +54,32 @@
      RETURN = 270,
      PRINT = 271,
      IN = 272,
-     ID = 273,
-     INTEGER = 274,
-     FLOAT = 275,
-     OTHER = 276,
-     OP_PLUS = 277,
-     OP_MINUS = 278,
-     OP_MULT = 279,
-     OP_DIV = 280,
-     OP_LT = 281,
-     OP_GT = 282,
-     OP_NE = 283,
-     OP_LE = 284,
-     OP_GE = 285,
-     OP_EQ = 286,
-     OP_NOT = 287,
-     DE_SEMICOLON = 288,
-     DE_COMMA = 289,
-     DE_DOT = 290,
-     DE_ASSIGN = 291,
-     DE_LP = 292,
-     DE_RP = 293,
-     DE_LSB = 294,
-     DE_RSB = 295,
-     DE_COLON = 296
+     TYPE_INT = 273,
+     TYPE_FLOAT = 274,
+     ID = 275,
+     INTEGER = 276,
+     FLOAT = 277,
+     OTHER = 278,
+     OP_PLUS = 279,
+     OP_MINUS = 280,
+     OP_MULT = 281,
+     OP_DIV = 282,
+     OP_LT = 283,
+     OP_GT = 284,
+     OP_NE = 285,
+     OP_LE = 286,
+     OP_GE = 287,
+     OP_EQ = 288,
+     OP_NOT = 289,
+     DE_SEMICOLON = 290,
+     DE_COMMA = 291,
+     DE_DOT = 292,
+     DE_ASSIGN = 293,
+     DE_LP = 294,
+     DE_RP = 295,
+     DE_LSB = 296,
+     DE_RSB = 297,
+     DE_COLON = 298
    };
 #endif
 
@@ -97,7 +99,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 101 "main.tab.h"
+#line 103 "main.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
