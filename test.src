@@ -1,0 +1,29 @@
+mainprog mucheol;
+int[100] x,z123;
+float y;
+begin
+	for muchul in bongbong:
+	begin
+		fuckfuckfuck = a + b * c - d / efg01230;
+		if fuckfuckfuck == 1:
+			begin
+				couldbe(123123);
+				fuckfuckfuck = 1
+			end
+		elif fuckfuckfuck == 2:
+			begin
+				couldbe()
+			end
+		else:
+			begin
+				nimisaaweljfnwalej();
+				while 1==2:
+					begin
+						fuksdlajfkwlaejf(-1123123.23231241240000);
+						couldbecoubldalfje(a,b,c,d+2)
+					end
+			end
+	end
+	;
+	print(bongbong == muchul)
+end
