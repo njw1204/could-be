@@ -22,6 +22,7 @@ int yyerror(char *s);
 %%
 
 program:
+	MAINPROG ID DE_SEMICOLON declarations subprogram_declarations compound_statement
 ;
 
 %%
