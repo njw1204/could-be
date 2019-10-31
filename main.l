@@ -31,24 +31,6 @@ float			{digit}*\.{digit}+
 {float}				{yylval.floatData = atof(yytext); return (FLOAT);}
 [ \t\n\r]+			{}
 .					{showError(); return(OTHER);}
-"mainprog"			{return (MAINPROG);}
-"function"			{return (FUNCTION);}
-"procedure"			{return (PROCEDURE);}
-"begin"				{return (BEGIN);}
-"end"				{return (END);}
-"if"				{return (IF);}
-"then"				{return (THEN);}
-"else"				{return (ELSE);}
-"nop"				{return (NOP);}
-"while"				{return (WHILE);}
-"return"			{return (RETURN);}
-"print"				{return (PRINT);}
-"in"				{return (IN);}
-{id}				{sscanf(yytext, "%s", yylval.name); return (ID);}
-{integer}			{yylval.intData = atoi(yytext); return (INTEGER);}
-{float}				{yylval.floatData = atof(yytext); return (FLOAT);}
-[ \t\n\r]+			{}
-.					{showError(); return(OTHER);}
 
 "+"                 {return (OP_PLUS);}
 "-"					{return (OP_MINUS);}
