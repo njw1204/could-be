@@ -5,12 +5,18 @@ Terminals unused in grammar
    DE_DOT
 
 
+Rules useless in parser due to conflicts
+
+   32 if_statement: IF expression DE_COLON statement elif_statement ELSE DE_COLON statement
+
+   36 while_statement: WHILE expression DE_COLON statement ELSE DE_COLON statement
+
+   38 for_statement: FOR expression IN expression DE_COLON statement ELSE DE_COLON statement
+
+
 State 63 conflicts: 1 shift/reduce
 State 107 conflicts: 1 shift/reduce
-State 111 conflicts: 1 shift/reduce
-State 119 conflicts: 1 shift/reduce
-State 126 conflicts: 1 shift/reduce
-State 131 conflicts: 1 shift/reduce
+State 125 conflicts: 1 shift/reduce
 
 
 Grammar
@@ -1383,9 +1389,6 @@ state 111
    35 while_statement: WHILE expression DE_COLON statement .
    36                | WHILE expression DE_COLON statement . ELSE DE_COLON statement
 
-    ELSE  shift, and go to state 120
-
-    ELSE      [reduce using rule 35 (while_statement)]
     $default  reduce using rule 35 (while_statement)
 
 
@@ -1394,7 +1397,7 @@ state 112
    37 for_statement: FOR expression IN expression . DE_COLON statement
    38              | FOR expression IN expression . DE_COLON statement ELSE DE_COLON statement
 
-    DE_COLON  shift, and go to state 121
+    DE_COLON  shift, and go to state 120
 
 
 state 113
@@ -1424,7 +1427,7 @@ state 115
 
     variable             go to state 60
     procedure_statement  go to state 61
-    expression_list      go to state 122
+    expression_list      go to state 121
     expression           go to state 101
     simple_expression    go to state 63
     term                 go to state 64
@@ -1459,7 +1462,7 @@ state 118
 
     variable             go to state 60
     procedure_statement  go to state 61
-    expression           go to state 123
+    expression           go to state 122
     simple_expression    go to state 63
     term                 go to state 64
     factor               go to state 65
@@ -1471,20 +1474,10 @@ state 119
    31 if_statement: IF expression DE_COLON statement elif_statement .
    32             | IF expression DE_COLON statement elif_statement . ELSE DE_COLON statement
 
-    ELSE  shift, and go to state 124
-
-    ELSE      [reduce using rule 31 (if_statement)]
     $default  reduce using rule 31 (if_statement)
 
 
 state 120
-
-   36 while_statement: WHILE expression DE_COLON statement ELSE . DE_COLON statement
-
-    DE_COLON  shift, and go to state 125
-
-
-state 121
 
    37 for_statement: FOR expression IN expression DE_COLON . statement
    38              | FOR expression IN expression DE_COLON . statement ELSE DE_COLON statement
@@ -1499,7 +1492,7 @@ state 121
     ID      shift, and go to state 37
 
     compound_statement   go to state 38
-    statement            go to state 126
+    statement            go to state 123
     if_statement         go to state 41
     while_statement      go to state 42
     for_statement        go to state 43
@@ -1508,62 +1501,29 @@ state 121
     procedure_statement  go to state 46
 
 
-state 122
+state 121
 
    47 expression_list: expression DE_COMMA expression_list .
 
     $default  reduce using rule 47 (expression_list)
 
 
-state 123
+state 122
 
    33 elif_statement: ELIF expression . DE_COLON statement elif_statement
 
-    DE_COLON  shift, and go to state 127
+    DE_COLON  shift, and go to state 124
 
 
-state 124
-
-   32 if_statement: IF expression DE_COLON statement elif_statement ELSE . DE_COLON statement
-
-    DE_COLON  shift, and go to state 128
-
-
-state 125
-
-   36 while_statement: WHILE expression DE_COLON statement ELSE DE_COLON . statement
-
-    BEGIN   shift, and go to state 21
-    IF      shift, and go to state 31
-    NOP     shift, and go to state 32
-    WHILE   shift, and go to state 33
-    FOR     shift, and go to state 34
-    RETURN  shift, and go to state 35
-    PRINT   shift, and go to state 36
-    ID      shift, and go to state 37
-
-    compound_statement   go to state 38
-    statement            go to state 129
-    if_statement         go to state 41
-    while_statement      go to state 42
-    for_statement        go to state 43
-    print_statement      go to state 44
-    variable             go to state 45
-    procedure_statement  go to state 46
-
-
-state 126
+state 123
 
    37 for_statement: FOR expression IN expression DE_COLON statement .
    38              | FOR expression IN expression DE_COLON statement . ELSE DE_COLON statement
 
-    ELSE  shift, and go to state 130
-
-    ELSE      [reduce using rule 37 (for_statement)]
     $default  reduce using rule 37 (for_statement)
 
 
-state 127
+state 124
 
    33 elif_statement: ELIF expression DE_COLON . statement elif_statement
 
@@ -1577,7 +1537,7 @@ state 127
     ID      shift, and go to state 37
 
     compound_statement   go to state 38
-    statement            go to state 131
+    statement            go to state 125
     if_statement         go to state 41
     while_statement      go to state 42
     for_statement        go to state 43
@@ -1586,44 +1546,7 @@ state 127
     procedure_statement  go to state 46
 
 
-state 128
-
-   32 if_statement: IF expression DE_COLON statement elif_statement ELSE DE_COLON . statement
-
-    BEGIN   shift, and go to state 21
-    IF      shift, and go to state 31
-    NOP     shift, and go to state 32
-    WHILE   shift, and go to state 33
-    FOR     shift, and go to state 34
-    RETURN  shift, and go to state 35
-    PRINT   shift, and go to state 36
-    ID      shift, and go to state 37
-
-    compound_statement   go to state 38
-    statement            go to state 132
-    if_statement         go to state 41
-    while_statement      go to state 42
-    for_statement        go to state 43
-    print_statement      go to state 44
-    variable             go to state 45
-    procedure_statement  go to state 46
-
-
-state 129
-
-   36 while_statement: WHILE expression DE_COLON statement ELSE DE_COLON statement .
-
-    $default  reduce using rule 36 (while_statement)
-
-
-state 130
-
-   38 for_statement: FOR expression IN expression DE_COLON statement ELSE . DE_COLON statement
-
-    DE_COLON  shift, and go to state 133
-
-
-state 131
+state 125
 
    33 elif_statement: ELIF expression DE_COLON statement . elif_statement
 
@@ -1632,48 +1555,11 @@ state 131
     ELIF      [reduce using rule 34 (elif_statement)]
     $default  reduce using rule 34 (elif_statement)
 
-    elif_statement  go to state 134
+    elif_statement  go to state 126
 
 
-state 132
-
-   32 if_statement: IF expression DE_COLON statement elif_statement ELSE DE_COLON statement .
-
-    $default  reduce using rule 32 (if_statement)
-
-
-state 133
-
-   38 for_statement: FOR expression IN expression DE_COLON statement ELSE DE_COLON . statement
-
-    BEGIN   shift, and go to state 21
-    IF      shift, and go to state 31
-    NOP     shift, and go to state 32
-    WHILE   shift, and go to state 33
-    FOR     shift, and go to state 34
-    RETURN  shift, and go to state 35
-    PRINT   shift, and go to state 36
-    ID      shift, and go to state 37
-
-    compound_statement   go to state 38
-    statement            go to state 135
-    if_statement         go to state 41
-    while_statement      go to state 42
-    for_statement        go to state 43
-    print_statement      go to state 44
-    variable             go to state 45
-    procedure_statement  go to state 46
-
-
-state 134
+state 126
 
    33 elif_statement: ELIF expression DE_COLON statement elif_statement .
 
     $default  reduce using rule 33 (elif_statement)
-
-
-state 135
-
-   38 for_statement: FOR expression IN expression DE_COLON statement ELSE DE_COLON statement .
-
-    $default  reduce using rule 38 (for_statement)
