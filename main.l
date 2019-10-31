@@ -3,7 +3,6 @@
 #include <string.h>
 #include "main.tab.h"
 void showError();
-int yylineno = 1;
 %}
 
 %option	yylineno
