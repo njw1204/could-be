@@ -58,7 +58,6 @@ float			{digit}*\.{digit}+
 ":"					{return (DE_COLON);}
 
 [ \t\r]+			{}
-\n					{yylineno++;}
 .					{showError(); return (OTHER);}
 
 %%
