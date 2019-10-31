@@ -7,7 +7,7 @@ void showError();
 
 letter			[a-zA-Z]
 digit			[0-9]
-operator		\+|\-|\*|/|\<|\<\=|\>\=|\>|\=\=|\!\=|\!
+operator		\+|\-|\*|\/|\<|\<\=|\>\=|\>|\=\=|\!\=|\!
 delimiter		;|\.|,|\=|\(|\)|\[|\]|:
 id				{letter}({letter}|{digit})*
 integer			{digit}+
