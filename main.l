@@ -3,7 +3,10 @@
 #include <string.h>
 #include "main.tab.h"
 void showError();
+int yylineno = 1;
 %}
+
+%option	yylineno
 
 letter			[a-zA-Z]
 digit			[0-9]
@@ -55,7 +58,8 @@ float			{digit}*\.{digit}+
 "]"					{return (DE_RSB);}
 ":"					{return (DE_COLON);}
 
-[ \t\n\r]+			{}
+[ \t\r]+			{}
+\n					{yylineno++;}
 .					{showError(); return (OTHER);}
 
 %%
