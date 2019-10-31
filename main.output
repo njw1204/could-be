@@ -12,7 +12,7 @@ Grammar
     1 program: MAINPROG ID DE_SEMICOLON declarations subprogram_declarations compound_statement
 
     2 declarations: type identifier_list DE_SEMICOLON declarations
-    3             | /* empty */
+    3             | %empty
 
     4 identifier_list: ID
     5                | ID DE_COMMA identifier_list
@@ -24,7 +24,7 @@ Grammar
     9              | TYPE_FLOAT
 
    10 subprogram_declarations: subprogram_declaration subprogram_declarations
-   11                        | /* empty */
+   11                        | %empty
 
    12 subprogram_declaration: subprogram_head declarations compound_statement
 
@@ -32,10 +32,10 @@ Grammar
    14                | PROCEDURE ID arguments DE_SEMICOLON
 
    15 arguments: DE_LP parameter_list DE_RP
-   16          | /* empty */
+   16          | %empty
 
    17 parameter_list: identifier_list DE_COLON type
-   18               | identifier_list DE_COLON type DE_SEMICOLON
+   18               | identifier_list DE_COLON type DE_SEMICOLON parameter_list
 
    19 compound_statement: BEGIN_BODY statement_list END_BODY
 
@@ -75,7 +75,7 @@ Grammar
    45 procedure_statement: ID DE_LP actual_parameter_expression DE_RP
 
    46 actual_parameter_expression: expression_list
-   47                            | /* empty */
+   47                            | %empty
 
    48 expression_list: expression
    49                | expression DE_COMMA expression_list
@@ -186,7 +186,7 @@ subprogram_head (52)
 arguments (53)
     on left: 15 16, on right: 13 14
 parameter_list (54)
-    on left: 17 18, on right: 15
+    on left: 17 18, on right: 15 18
 compound_statement (55)
     on left: 19, on right: 1 12 25
 statement_list (56)
@@ -233,7 +233,7 @@ multop (75)
     on left: 74 75, on right: 57
 
 
-state 0
+State 0
 
     0 $accept: . program $end
 
@@ -242,35 +242,35 @@ state 0
     program  go to state 2
 
 
-state 1
+State 1
 
     1 program: MAINPROG . ID DE_SEMICOLON declarations subprogram_declarations compound_statement
 
     ID  shift, and go to state 3
 
 
-state 2
+State 2
 
     0 $accept: program . $end
 
     $end  shift, and go to state 4
 
 
-state 3
+State 3
 
     1 program: MAINPROG ID . DE_SEMICOLON declarations subprogram_declarations compound_statement
 
     DE_SEMICOLON  shift, and go to state 5
 
 
-state 4
+State 4
 
     0 $accept: program $end .
 
     $default  accept
 
 
-state 5
+State 5
 
     1 program: MAINPROG ID DE_SEMICOLON . declarations subprogram_declarations compound_statement
 
@@ -284,21 +284,21 @@ state 5
     standard_type  go to state 10
 
 
-state 6
+State 6
 
     8 standard_type: TYPE_INT .
 
     $default  reduce using rule 8 (standard_type)
 
 
-state 7
+State 7
 
     9 standard_type: TYPE_FLOAT .
 
     $default  reduce using rule 9 (standard_type)
 
 
-state 8
+State 8
 
     1 program: MAINPROG ID DE_SEMICOLON declarations . subprogram_declarations compound_statement
 
@@ -312,7 +312,7 @@ state 8
     subprogram_head          go to state 15
 
 
-state 9
+State 9
 
     2 declarations: type . identifier_list DE_SEMICOLON declarations
 
@@ -321,7 +321,7 @@ state 9
     identifier_list  go to state 17
 
 
-state 10
+State 10
 
     6 type: standard_type .
     7     | standard_type . DE_LSB INTEGER DE_RSB
@@ -331,21 +331,21 @@ state 10
     $default  reduce using rule 6 (type)
 
 
-state 11
+State 11
 
    13 subprogram_head: FUNCTION . ID arguments DE_COLON standard_type DE_SEMICOLON
 
     ID  shift, and go to state 19
 
 
-state 12
+State 12
 
    14 subprogram_head: PROCEDURE . ID arguments DE_SEMICOLON
 
     ID  shift, and go to state 20
 
 
-state 13
+State 13
 
     1 program: MAINPROG ID DE_SEMICOLON declarations subprogram_declarations . compound_statement
 
@@ -354,7 +354,7 @@ state 13
     compound_statement  go to state 22
 
 
-state 14
+State 14
 
    10 subprogram_declarations: subprogram_declaration . subprogram_declarations
 
@@ -368,7 +368,7 @@ state 14
     subprogram_head          go to state 15
 
 
-state 15
+State 15
 
    12 subprogram_declaration: subprogram_head . declarations compound_statement
 
@@ -382,7 +382,7 @@ state 15
     standard_type  go to state 10
 
 
-state 16
+State 16
 
     4 identifier_list: ID .
     5                | ID . DE_COMMA identifier_list
@@ -392,21 +392,21 @@ state 16
     $default  reduce using rule 4 (identifier_list)
 
 
-state 17
+State 17
 
     2 declarations: type identifier_list . DE_SEMICOLON declarations
 
     DE_SEMICOLON  shift, and go to state 26
 
 
-state 18
+State 18
 
     7 type: standard_type DE_LSB . INTEGER DE_RSB
 
     INTEGER  shift, and go to state 27
 
 
-state 19
+State 19
 
    13 subprogram_head: FUNCTION ID . arguments DE_COLON standard_type DE_SEMICOLON
 
@@ -417,7 +417,7 @@ state 19
     arguments  go to state 29
 
 
-state 20
+State 20
 
    14 subprogram_head: PROCEDURE ID . arguments DE_SEMICOLON
 
@@ -428,7 +428,7 @@ state 20
     arguments  go to state 30
 
 
-state 21
+State 21
 
    19 compound_statement: BEGIN_BODY . statement_list END_BODY
 
@@ -452,21 +452,21 @@ state 21
     procedure_statement  go to state 46
 
 
-state 22
+State 22
 
     1 program: MAINPROG ID DE_SEMICOLON declarations subprogram_declarations compound_statement .
 
     $default  reduce using rule 1 (program)
 
 
-state 23
+State 23
 
    10 subprogram_declarations: subprogram_declaration subprogram_declarations .
 
     $default  reduce using rule 10 (subprogram_declarations)
 
 
-state 24
+State 24
 
    12 subprogram_declaration: subprogram_head declarations . compound_statement
 
@@ -475,7 +475,7 @@ state 24
     compound_statement  go to state 47
 
 
-state 25
+State 25
 
     5 identifier_list: ID DE_COMMA . identifier_list
 
@@ -484,7 +484,7 @@ state 25
     identifier_list  go to state 48
 
 
-state 26
+State 26
 
     2 declarations: type identifier_list DE_SEMICOLON . declarations
 
@@ -498,14 +498,14 @@ state 26
     standard_type  go to state 10
 
 
-state 27
+State 27
 
     7 type: standard_type DE_LSB INTEGER . DE_RSB
 
     DE_RSB  shift, and go to state 50
 
 
-state 28
+State 28
 
    15 arguments: DE_LP . parameter_list DE_RP
 
@@ -515,21 +515,21 @@ state 28
     parameter_list   go to state 52
 
 
-state 29
+State 29
 
    13 subprogram_head: FUNCTION ID arguments . DE_COLON standard_type DE_SEMICOLON
 
     DE_COLON  shift, and go to state 53
 
 
-state 30
+State 30
 
    14 subprogram_head: PROCEDURE ID arguments . DE_SEMICOLON
 
     DE_SEMICOLON  shift, and go to state 54
 
 
-state 31
+State 31
 
    31 if_statement: IF . expression DE_COLON statement
    32             | IF . expression DE_COLON statement ELSE DE_COLON statement
@@ -553,14 +553,14 @@ state 31
     sign                 go to state 67
 
 
-state 32
+State 32
 
    30 statement: NOP .
 
     $default  reduce using rule 30 (statement)
 
 
-state 33
+State 33
 
    37 while_statement: WHILE . expression DE_COLON statement
    38                | WHILE . expression DE_COLON statement ELSE DE_COLON statement
@@ -582,7 +582,7 @@ state 33
     sign                 go to state 67
 
 
-state 34
+State 34
 
    39 for_statement: FOR . in_expression DE_COLON statement
    40              | FOR . in_expression DE_COLON statement ELSE DE_COLON statement
@@ -603,7 +603,7 @@ state 34
     sign                 go to state 67
 
 
-state 35
+State 35
 
    29 statement: RETURN . expression
 
@@ -624,7 +624,7 @@ state 35
     sign                 go to state 67
 
 
-state 36
+State 36
 
    41 print_statement: PRINT .
    42                | PRINT . DE_LP expression DE_RP
@@ -634,7 +634,7 @@ state 36
     $default  reduce using rule 41 (print_statement)
 
 
-state 37
+State 37
 
    43 variable: ID .
    44         | ID . DE_LSB expression DE_RSB
@@ -646,21 +646,21 @@ state 37
     $default  reduce using rule 43 (variable)
 
 
-state 38
+State 38
 
    25 statement: compound_statement .
 
     $default  reduce using rule 25 (statement)
 
 
-state 39
+State 39
 
    19 compound_statement: BEGIN_BODY statement_list . END_BODY
 
     END_BODY  shift, and go to state 75
 
 
-state 40
+State 40
 
    20 statement_list: statement .
    21               | statement . DE_SEMICOLON statement_list
@@ -670,92 +670,92 @@ state 40
     $default  reduce using rule 20 (statement_list)
 
 
-state 41
+State 41
 
    26 statement: if_statement .
 
     $default  reduce using rule 26 (statement)
 
 
-state 42
+State 42
 
    27 statement: while_statement .
 
     $default  reduce using rule 27 (statement)
 
 
-state 43
+State 43
 
    28 statement: for_statement .
 
     $default  reduce using rule 28 (statement)
 
 
-state 44
+State 44
 
    23 statement: print_statement .
 
     $default  reduce using rule 23 (statement)
 
 
-state 45
+State 45
 
    22 statement: variable . DE_ASSIGN expression
 
     DE_ASSIGN  shift, and go to state 77
 
 
-state 46
+State 46
 
    24 statement: procedure_statement .
 
     $default  reduce using rule 24 (statement)
 
 
-state 47
+State 47
 
    12 subprogram_declaration: subprogram_head declarations compound_statement .
 
     $default  reduce using rule 12 (subprogram_declaration)
 
 
-state 48
+State 48
 
     5 identifier_list: ID DE_COMMA identifier_list .
 
     $default  reduce using rule 5 (identifier_list)
 
 
-state 49
+State 49
 
     2 declarations: type identifier_list DE_SEMICOLON declarations .
 
     $default  reduce using rule 2 (declarations)
 
 
-state 50
+State 50
 
     7 type: standard_type DE_LSB INTEGER DE_RSB .
 
     $default  reduce using rule 7 (type)
 
 
-state 51
+State 51
 
    17 parameter_list: identifier_list . DE_COLON type
-   18               | identifier_list . DE_COLON type DE_SEMICOLON
+   18               | identifier_list . DE_COLON type DE_SEMICOLON parameter_list
 
     DE_COLON  shift, and go to state 78
 
 
-state 52
+State 52
 
    15 arguments: DE_LP parameter_list . DE_RP
 
     DE_RP  shift, and go to state 79
 
 
-state 53
+State 53
 
    13 subprogram_head: FUNCTION ID arguments DE_COLON . standard_type DE_SEMICOLON
 
@@ -765,42 +765,42 @@ state 53
     standard_type  go to state 80
 
 
-state 54
+State 54
 
    14 subprogram_head: PROCEDURE ID arguments DE_SEMICOLON .
 
     $default  reduce using rule 14 (subprogram_head)
 
 
-state 55
+State 55
 
    58 factor: INTEGER .
 
     $default  reduce using rule 58 (factor)
 
 
-state 56
+State 56
 
    59 factor: FLOAT .
 
     $default  reduce using rule 59 (factor)
 
 
-state 57
+State 57
 
    64 sign: OP_PLUS .
 
     $default  reduce using rule 64 (sign)
 
 
-state 58
+State 58
 
    65 sign: OP_MINUS .
 
     $default  reduce using rule 65 (sign)
 
 
-state 59
+State 59
 
    62 factor: OP_NOT . factor
 
@@ -817,21 +817,21 @@ state 59
     sign                 go to state 67
 
 
-state 60
+State 60
 
    60 factor: variable .
 
     $default  reduce using rule 60 (factor)
 
 
-state 61
+State 61
 
    61 factor: procedure_statement .
 
     $default  reduce using rule 61 (factor)
 
 
-state 62
+State 62
 
    31 if_statement: IF expression . DE_COLON statement
    32             | IF expression . DE_COLON statement ELSE DE_COLON statement
@@ -841,14 +841,14 @@ state 62
     DE_COLON  shift, and go to state 82
 
 
-state 63
+State 63
 
    51 expression: in_expression .
 
     $default  reduce using rule 51 (expression)
 
 
-state 64
+State 64
 
    50 expression: simple_expression .
    52           | simple_expression . relop simple_expression
@@ -867,7 +867,7 @@ state 64
     relop  go to state 90
 
 
-state 65
+State 65
 
    54 simple_expression: term .
    55                  | term . addop simple_expression
@@ -880,7 +880,7 @@ state 65
     addop  go to state 93
 
 
-state 66
+State 66
 
    56 term: factor .
    57     | factor . multop term
@@ -893,7 +893,7 @@ state 66
     multop  go to state 96
 
 
-state 67
+State 67
 
    63 factor: sign . factor
 
@@ -910,7 +910,7 @@ state 67
     sign                 go to state 67
 
 
-state 68
+State 68
 
    37 while_statement: WHILE expression . DE_COLON statement
    38                | WHILE expression . DE_COLON statement ELSE DE_COLON statement
@@ -918,7 +918,7 @@ state 68
     DE_COLON  shift, and go to state 98
 
 
-state 69
+State 69
 
    39 for_statement: FOR in_expression . DE_COLON statement
    40              | FOR in_expression . DE_COLON statement ELSE DE_COLON statement
@@ -926,21 +926,21 @@ state 69
     DE_COLON  shift, and go to state 99
 
 
-state 70
+State 70
 
    53 in_expression: simple_expression . IN simple_expression
 
     IN  shift, and go to state 83
 
 
-state 71
+State 71
 
    29 statement: RETURN expression .
 
     $default  reduce using rule 29 (statement)
 
 
-state 72
+State 72
 
    42 print_statement: PRINT DE_LP . expression DE_RP
 
@@ -961,7 +961,7 @@ state 72
     sign                 go to state 67
 
 
-state 73
+State 73
 
    45 procedure_statement: ID DE_LP . actual_parameter_expression DE_RP
 
@@ -986,7 +986,7 @@ state 73
     sign                         go to state 67
 
 
-state 74
+State 74
 
    44 variable: ID DE_LSB . expression DE_RSB
 
@@ -1007,14 +1007,14 @@ state 74
     sign                 go to state 67
 
 
-state 75
+State 75
 
    19 compound_statement: BEGIN_BODY statement_list END_BODY .
 
     $default  reduce using rule 19 (compound_statement)
 
 
-state 76
+State 76
 
    21 statement_list: statement DE_SEMICOLON . statement_list
 
@@ -1038,7 +1038,7 @@ state 76
     procedure_statement  go to state 46
 
 
-state 77
+State 77
 
    22 statement: variable DE_ASSIGN . expression
 
@@ -1059,10 +1059,10 @@ state 77
     sign                 go to state 67
 
 
-state 78
+State 78
 
    17 parameter_list: identifier_list DE_COLON . type
-   18               | identifier_list DE_COLON . type DE_SEMICOLON
+   18               | identifier_list DE_COLON . type DE_SEMICOLON parameter_list
 
     TYPE_INT    shift, and go to state 6
     TYPE_FLOAT  shift, and go to state 7
@@ -1071,28 +1071,28 @@ state 78
     standard_type  go to state 10
 
 
-state 79
+State 79
 
    15 arguments: DE_LP parameter_list DE_RP .
 
     $default  reduce using rule 15 (arguments)
 
 
-state 80
+State 80
 
    13 subprogram_head: FUNCTION ID arguments DE_COLON standard_type . DE_SEMICOLON
 
     DE_SEMICOLON  shift, and go to state 108
 
 
-state 81
+State 81
 
    62 factor: OP_NOT factor .
 
     $default  reduce using rule 62 (factor)
 
 
-state 82
+State 82
 
    31 if_statement: IF expression DE_COLON . statement
    32             | IF expression DE_COLON . statement ELSE DE_COLON statement
@@ -1118,7 +1118,7 @@ state 82
     procedure_statement  go to state 46
 
 
-state 83
+State 83
 
    53 in_expression: simple_expression IN . simple_expression
 
@@ -1137,49 +1137,49 @@ state 83
     sign                 go to state 67
 
 
-state 84
+State 84
 
    68 relop: OP_LT .
 
     $default  reduce using rule 68 (relop)
 
 
-state 85
+State 85
 
    66 relop: OP_GT .
 
     $default  reduce using rule 66 (relop)
 
 
-state 86
+State 86
 
    71 relop: OP_NE .
 
     $default  reduce using rule 71 (relop)
 
 
-state 87
+State 87
 
    69 relop: OP_LE .
 
     $default  reduce using rule 69 (relop)
 
 
-state 88
+State 88
 
    67 relop: OP_GE .
 
     $default  reduce using rule 67 (relop)
 
 
-state 89
+State 89
 
    70 relop: OP_EQ .
 
     $default  reduce using rule 70 (relop)
 
 
-state 90
+State 90
 
    52 expression: simple_expression relop . simple_expression
 
@@ -1198,21 +1198,21 @@ state 90
     sign                 go to state 67
 
 
-state 91
+State 91
 
    72 addop: OP_PLUS .
 
     $default  reduce using rule 72 (addop)
 
 
-state 92
+State 92
 
    73 addop: OP_MINUS .
 
     $default  reduce using rule 73 (addop)
 
 
-state 93
+State 93
 
    55 simple_expression: term addop . simple_expression
 
@@ -1231,21 +1231,21 @@ state 93
     sign                 go to state 67
 
 
-state 94
+State 94
 
    74 multop: OP_MULT .
 
     $default  reduce using rule 74 (multop)
 
 
-state 95
+State 95
 
    75 multop: OP_DIV .
 
     $default  reduce using rule 75 (multop)
 
 
-state 96
+State 96
 
    57 term: factor multop . term
 
@@ -1263,14 +1263,14 @@ state 96
     sign                 go to state 67
 
 
-state 97
+State 97
 
    63 factor: sign factor .
 
     $default  reduce using rule 63 (factor)
 
 
-state 98
+State 98
 
    37 while_statement: WHILE expression DE_COLON . statement
    38                | WHILE expression DE_COLON . statement ELSE DE_COLON statement
@@ -1294,7 +1294,7 @@ state 98
     procedure_statement  go to state 46
 
 
-state 99
+State 99
 
    39 for_statement: FOR in_expression DE_COLON . statement
    40              | FOR in_expression DE_COLON . statement ELSE DE_COLON statement
@@ -1318,28 +1318,28 @@ state 99
     procedure_statement  go to state 46
 
 
-state 100
+State 100
 
    42 print_statement: PRINT DE_LP expression . DE_RP
 
     DE_RP  shift, and go to state 116
 
 
-state 101
+State 101
 
    45 procedure_statement: ID DE_LP actual_parameter_expression . DE_RP
 
     DE_RP  shift, and go to state 117
 
 
-state 102
+State 102
 
    46 actual_parameter_expression: expression_list .
 
     $default  reduce using rule 46 (actual_parameter_expression)
 
 
-state 103
+State 103
 
    48 expression_list: expression .
    49                | expression . DE_COMMA expression_list
@@ -1349,45 +1349,45 @@ state 103
     $default  reduce using rule 48 (expression_list)
 
 
-state 104
+State 104
 
    44 variable: ID DE_LSB expression . DE_RSB
 
     DE_RSB  shift, and go to state 119
 
 
-state 105
+State 105
 
    21 statement_list: statement DE_SEMICOLON statement_list .
 
     $default  reduce using rule 21 (statement_list)
 
 
-state 106
+State 106
 
    22 statement: variable DE_ASSIGN expression .
 
     $default  reduce using rule 22 (statement)
 
 
-state 107
+State 107
 
    17 parameter_list: identifier_list DE_COLON type .
-   18               | identifier_list DE_COLON type . DE_SEMICOLON
+   18               | identifier_list DE_COLON type . DE_SEMICOLON parameter_list
 
     DE_SEMICOLON  shift, and go to state 120
 
     $default  reduce using rule 17 (parameter_list)
 
 
-state 108
+State 108
 
    13 subprogram_head: FUNCTION ID arguments DE_COLON standard_type DE_SEMICOLON .
 
     $default  reduce using rule 13 (subprogram_head)
 
 
-state 109
+State 109
 
    31 if_statement: IF expression DE_COLON statement .
    32             | IF expression DE_COLON statement . ELSE DE_COLON statement
@@ -1402,35 +1402,35 @@ state 109
     elif_statement  go to state 123
 
 
-state 110
+State 110
 
    53 in_expression: simple_expression IN simple_expression .
 
     $default  reduce using rule 53 (in_expression)
 
 
-state 111
+State 111
 
    52 expression: simple_expression relop simple_expression .
 
     $default  reduce using rule 52 (expression)
 
 
-state 112
+State 112
 
    55 simple_expression: term addop simple_expression .
 
     $default  reduce using rule 55 (simple_expression)
 
 
-state 113
+State 113
 
    57 term: factor multop term .
 
     $default  reduce using rule 57 (term)
 
 
-state 114
+State 114
 
    37 while_statement: WHILE expression DE_COLON statement .
    38                | WHILE expression DE_COLON statement . ELSE DE_COLON statement
@@ -1440,7 +1440,7 @@ state 114
     $default  reduce using rule 37 (while_statement)
 
 
-state 115
+State 115
 
    39 for_statement: FOR in_expression DE_COLON statement .
    40              | FOR in_expression DE_COLON statement . ELSE DE_COLON statement
@@ -1450,21 +1450,21 @@ state 115
     $default  reduce using rule 39 (for_statement)
 
 
-state 116
+State 116
 
    42 print_statement: PRINT DE_LP expression DE_RP .
 
     $default  reduce using rule 42 (print_statement)
 
 
-state 117
+State 117
 
    45 procedure_statement: ID DE_LP actual_parameter_expression DE_RP .
 
     $default  reduce using rule 45 (procedure_statement)
 
 
-state 118
+State 118
 
    49 expression_list: expression DE_COMMA . expression_list
 
@@ -1486,21 +1486,24 @@ state 118
     sign                 go to state 67
 
 
-state 119
+State 119
 
    44 variable: ID DE_LSB expression DE_RSB .
 
     $default  reduce using rule 44 (variable)
 
 
-state 120
+State 120
 
-   18 parameter_list: identifier_list DE_COLON type DE_SEMICOLON .
+   18 parameter_list: identifier_list DE_COLON type DE_SEMICOLON . parameter_list
 
-    $default  reduce using rule 18 (parameter_list)
+    ID  shift, and go to state 16
+
+    identifier_list  go to state 51
+    parameter_list   go to state 127
 
 
-state 121
+State 121
 
    35 elif_statement: ELIF . expression DE_COLON statement elif_statement
    36               | ELIF . expression DE_COLON statement
@@ -1514,7 +1517,7 @@ state 121
 
     variable             go to state 60
     procedure_statement  go to state 61
-    expression           go to state 127
+    expression           go to state 128
     in_expression        go to state 63
     simple_expression    go to state 64
     term                 go to state 65
@@ -1522,53 +1525,60 @@ state 121
     sign                 go to state 67
 
 
-state 122
+State 122
 
    32 if_statement: IF expression DE_COLON statement ELSE . DE_COLON statement
 
-    DE_COLON  shift, and go to state 128
+    DE_COLON  shift, and go to state 129
 
 
-state 123
+State 123
 
    33 if_statement: IF expression DE_COLON statement elif_statement .
    34             | IF expression DE_COLON statement elif_statement . ELSE DE_COLON statement
 
-    ELSE  shift, and go to state 129
+    ELSE  shift, and go to state 130
 
     $default  reduce using rule 33 (if_statement)
 
 
-state 124
+State 124
 
    38 while_statement: WHILE expression DE_COLON statement ELSE . DE_COLON statement
-
-    DE_COLON  shift, and go to state 130
-
-
-state 125
-
-   40 for_statement: FOR in_expression DE_COLON statement ELSE . DE_COLON statement
 
     DE_COLON  shift, and go to state 131
 
 
-state 126
+State 125
+
+   40 for_statement: FOR in_expression DE_COLON statement ELSE . DE_COLON statement
+
+    DE_COLON  shift, and go to state 132
+
+
+State 126
 
    49 expression_list: expression DE_COMMA expression_list .
 
     $default  reduce using rule 49 (expression_list)
 
 
-state 127
+State 127
+
+   18 parameter_list: identifier_list DE_COLON type DE_SEMICOLON parameter_list .
+
+    $default  reduce using rule 18 (parameter_list)
+
+
+State 128
 
    35 elif_statement: ELIF expression . DE_COLON statement elif_statement
    36               | ELIF expression . DE_COLON statement
 
-    DE_COLON  shift, and go to state 132
+    DE_COLON  shift, and go to state 133
 
 
-state 128
+State 129
 
    32 if_statement: IF expression DE_COLON statement ELSE DE_COLON . statement
 
@@ -1582,7 +1592,7 @@ state 128
     ID          shift, and go to state 37
 
     compound_statement   go to state 38
-    statement            go to state 133
+    statement            go to state 134
     if_statement         go to state 41
     while_statement      go to state 42
     for_statement        go to state 43
@@ -1591,39 +1601,16 @@ state 128
     procedure_statement  go to state 46
 
 
-state 129
+State 130
 
    34 if_statement: IF expression DE_COLON statement elif_statement ELSE . DE_COLON statement
 
-    DE_COLON  shift, and go to state 134
+    DE_COLON  shift, and go to state 135
 
 
-state 130
+State 131
 
    38 while_statement: WHILE expression DE_COLON statement ELSE DE_COLON . statement
-
-    BEGIN_BODY  shift, and go to state 21
-    IF          shift, and go to state 31
-    NOP         shift, and go to state 32
-    WHILE       shift, and go to state 33
-    FOR         shift, and go to state 34
-    RETURN      shift, and go to state 35
-    PRINT       shift, and go to state 36
-    ID          shift, and go to state 37
-
-    compound_statement   go to state 38
-    statement            go to state 135
-    if_statement         go to state 41
-    while_statement      go to state 42
-    for_statement        go to state 43
-    print_statement      go to state 44
-    variable             go to state 45
-    procedure_statement  go to state 46
-
-
-state 131
-
-   40 for_statement: FOR in_expression DE_COLON statement ELSE DE_COLON . statement
 
     BEGIN_BODY  shift, and go to state 21
     IF          shift, and go to state 31
@@ -1644,10 +1631,9 @@ state 131
     procedure_statement  go to state 46
 
 
-state 132
+State 132
 
-   35 elif_statement: ELIF expression DE_COLON . statement elif_statement
-   36               | ELIF expression DE_COLON . statement
+   40 for_statement: FOR in_expression DE_COLON statement ELSE DE_COLON . statement
 
     BEGIN_BODY  shift, and go to state 21
     IF          shift, and go to state 31
@@ -1668,16 +1654,10 @@ state 132
     procedure_statement  go to state 46
 
 
-state 133
+State 133
 
-   32 if_statement: IF expression DE_COLON statement ELSE DE_COLON statement .
-
-    $default  reduce using rule 32 (if_statement)
-
-
-state 134
-
-   34 if_statement: IF expression DE_COLON statement elif_statement ELSE DE_COLON . statement
+   35 elif_statement: ELIF expression DE_COLON . statement elif_statement
+   36               | ELIF expression DE_COLON . statement
 
     BEGIN_BODY  shift, and go to state 21
     IF          shift, and go to state 31
@@ -1698,21 +1678,51 @@ state 134
     procedure_statement  go to state 46
 
 
-state 135
+State 134
+
+   32 if_statement: IF expression DE_COLON statement ELSE DE_COLON statement .
+
+    $default  reduce using rule 32 (if_statement)
+
+
+State 135
+
+   34 if_statement: IF expression DE_COLON statement elif_statement ELSE DE_COLON . statement
+
+    BEGIN_BODY  shift, and go to state 21
+    IF          shift, and go to state 31
+    NOP         shift, and go to state 32
+    WHILE       shift, and go to state 33
+    FOR         shift, and go to state 34
+    RETURN      shift, and go to state 35
+    PRINT       shift, and go to state 36
+    ID          shift, and go to state 37
+
+    compound_statement   go to state 38
+    statement            go to state 139
+    if_statement         go to state 41
+    while_statement      go to state 42
+    for_statement        go to state 43
+    print_statement      go to state 44
+    variable             go to state 45
+    procedure_statement  go to state 46
+
+
+State 136
 
    38 while_statement: WHILE expression DE_COLON statement ELSE DE_COLON statement .
 
     $default  reduce using rule 38 (while_statement)
 
 
-state 136
+State 137
 
    40 for_statement: FOR in_expression DE_COLON statement ELSE DE_COLON statement .
 
     $default  reduce using rule 40 (for_statement)
 
 
-state 137
+State 138
 
    35 elif_statement: ELIF expression DE_COLON statement . elif_statement
    36               | ELIF expression DE_COLON statement .
@@ -1721,17 +1731,17 @@ state 137
 
     $default  reduce using rule 36 (elif_statement)
 
-    elif_statement  go to state 139
+    elif_statement  go to state 140
 
 
-state 138
+State 139
 
    34 if_statement: IF expression DE_COLON statement elif_statement ELSE DE_COLON statement .
 
     $default  reduce using rule 34 (if_statement)
 
 
-state 139
+State 140
 
    35 elif_statement: ELIF expression DE_COLON statement elif_statement .
 
