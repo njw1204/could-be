@@ -8,6 +8,11 @@ int yyerror(char *s);
 %token OP_PLUS OP_MINUS OP_MULT OP_DIV OP_LT OP_GT OP_NE OP_LE OP_GE OP_EQ OP_NOT
 %token DE_SEMICOLON DE_COMMA DE_DOT DE_ASSIGN DE_LP DE_RP DE_LSB DE_RSB DE_COLON
 
+<<<<<<< Updated upstream
+=======
+%left OP_LT OP_GT OP_NE OP_LE OP_GE OP_EQ OP_NOT IN
+%right DE_COLON ELIF ELSE
+>>>>>>> Stashed changes
 
 %type <name> ID
 %type <intData> INTEGER
@@ -138,7 +143,13 @@ expression_list:
 
 expression:
 	simple_expression {}
-	| simple_expression relop simple_expression {}
+	| simple_expression OP_GT simple_expression {}
+	| simple_expression OP_GE simple_expression {}
+	| simple_expression OP_LT simple_expression {}
+	| simple_expression OP_LE simple_expression{}
+	| simple_expression OP_EQ simple_expression{}
+	| simple_expression OP_NE simple_expression{}
+	| simple_expression IN simple_expression{}
 ;
 simple_expression:
 	term {}
