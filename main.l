@@ -16,8 +16,8 @@ float			{digit}*\.{digit}+
 "mainprog"			{return (MAINPROG);}
 "function"			{return (FUNCTION);}
 "procedure"			{return (PROCEDURE);}
-"begin"				{return (BEGIN);}
-"end"				{return (END);}
+"begin"				{return (BEGIN_BODY);}
+"end"				{return (END_BODY);}
 "if"				{return (IF);}
 "then"				{return (THEN);}
 "elif"				{return (ELIF);}
