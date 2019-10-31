@@ -9,6 +9,9 @@ int yyerror(char *s);
 %token DE_SEMICOLON DE_COMMA DE_DOT DE_ASSIGN DE_LP DE_RP DE_LSB DE_RSB DE_COLON
 
 %right DE_COLON ELIF ELSE
+%left OP_LT OP_GT OP_NE OP_LE OP_GE OP_EQ IN
+%left OP_PLUS OP_MINUS
+%left OP_MULT OP_DIV
 
 %type <name> ID
 %type <intData> INTEGER
@@ -107,8 +110,8 @@ while_statement:
 
 
 for_statement:
-	FOR expression IN expression DE_COLON statement {}
-	| FOR expression IN expression DE_COLON statement ELSE DE_COLON statement {}
+	FOR in_expression DE_COLON statement {}
+	| FOR in_expression DE_COLON statement ELSE DE_COLON statement {}
 ;
 
 
@@ -139,7 +142,11 @@ expression_list:
 
 expression:
 	simple_expression {}
+	| in_expression {}
 	| simple_expression relop simple_expression {}
+;
+in_expression:
+	simple_expression IN simple_expression {}
 ;
 simple_expression:
 	term {}
@@ -169,7 +176,6 @@ relop:
 	| OP_LE {}
 	| OP_EQ {}
 	| OP_NE {}
-	| IN {}
 ;
 addop:
 	OP_PLUS {}
