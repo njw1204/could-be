@@ -59,7 +59,7 @@ float			{digit}*\.{digit}+
 "]"					{return (DE_RSB);}
 ":"					{return (DE_COLON);}
 
-[ \t\r]+			{}
+[ \t\r\n]+			{}
 .					{showError(); return (OTHER);}
 
 %%
