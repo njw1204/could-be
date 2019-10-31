@@ -22,7 +22,7 @@ int yyerror(char *s);
 %%
 
 program:
-	MAINPROG ID DE_SEMICOLON declarations subprogram_declarations compound_statement {}
+	MAINPROG ID DE_SEMICOLON declarations subprogram_declarations compound_statement { }
 ;
 
 
@@ -88,8 +88,6 @@ statement:
 
 
 if_statement:
-	IF expression DE_COLON statement {}
-	| IF expression DE_COLON statement ELSE DE_COLON statement {}
 	IF expression DE_COLON statement elif_statement {}
 	| IF expression DE_COLON statement elif_statement ELSE DE_COLON statement {}
 ;
