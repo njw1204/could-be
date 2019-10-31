@@ -1,6 +1,9 @@
 mainprog mucheol;
 int[100] x,z123;
 float y;
+
+function muchul (sex:int;fuck:float;fuckfuckfuck:int) : int;
+
 begin
 	for muchul in bongbong:
 	begin

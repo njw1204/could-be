@@ -68,7 +68,7 @@ arguments:
 ;
 parameter_list:
 	identifier_list DE_COLON type {}
-	| identifier_list DE_COLON type DE_SEMICOLON {}
+	| identifier_list DE_COLON type DE_SEMICOLON parameter_list{}
 ;
 
 
