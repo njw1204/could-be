@@ -2,6 +2,7 @@
 #include <stdio.h>
 int yylex();
 int yyerror(char *s);
+extern int yylineno;
 %}
 
 %token MAINPROG FUNCTION PROCEDURE BEGIN_BODY END_BODY IF THEN ELIF ELSE NOP WHILE FOR RETURN PRINT IN ID INTEGER FLOAT OTHER

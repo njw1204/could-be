@@ -73,10 +73,11 @@
 #include <stdio.h>
 int yylex();
 int yyerror(char *s);
+extern int yylineno;
 
 
 /* Line 189 of yacc.c  */
-#line 80 "main.tab.c"
+#line 81 "main.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -152,7 +153,7 @@ typedef union YYSTYPE
 {
 
 /* Line 214 of yacc.c  */
-#line 20 "main.y"
+#line 21 "main.y"
 
 	char name[1024];
 	int intData;
@@ -161,7 +162,7 @@ typedef union YYSTYPE
 
 
 /* Line 214 of yacc.c  */
-#line 165 "main.tab.c"
+#line 166 "main.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -173,7 +174,7 @@ typedef union YYSTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 177 "main.tab.c"
+#line 178 "main.tab.c"
 
 #ifdef short
 # undef short
@@ -490,14 +491,14 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    29,    29,    34,    35,    38,    39,    44,    45,    48,
-      49,    54,    55,    58,    61,    62,    65,    66,    69,    70,
-      75,    78,    79,    82,    83,    84,    85,    86,    87,    88,
-      89,    90,    95,    96,    97,    98,   101,   102,   107,   108,
-     113,   114,   119,   120,   125,   126,   131,   134,   135,   138,
-     139,   144,   145,   146,   149,   152,   153,   156,   157,   160,
-     161,   162,   163,   164,   165,   169,   170,   173,   174,   175,
-     176,   177,   178,   181,   182,   185,   186
+       0,    30,    30,    35,    36,    39,    40,    45,    46,    49,
+      50,    55,    56,    59,    62,    63,    66,    67,    70,    71,
+      76,    79,    80,    83,    84,    85,    86,    87,    88,    89,
+      90,    91,    96,    97,    98,    99,   102,   103,   108,   109,
+     114,   115,   120,   121,   126,   127,   132,   135,   136,   139,
+     140,   145,   146,   147,   150,   153,   154,   157,   158,   161,
+     162,   163,   164,   165,   166,   170,   171,   174,   175,   176,
+     177,   178,   179,   182,   183,   186,   187
 };
 #endif
 
@@ -1494,490 +1495,490 @@ yyreduce:
         case 2:
 
 /* Line 1455 of yacc.c  */
-#line 29 "main.y"
+#line 30 "main.y"
     { ;}
     break;
 
   case 3:
 
 /* Line 1455 of yacc.c  */
-#line 34 "main.y"
+#line 35 "main.y"
     {;}
     break;
 
   case 5:
 
 /* Line 1455 of yacc.c  */
-#line 38 "main.y"
+#line 39 "main.y"
     {;}
     break;
 
   case 6:
 
 /* Line 1455 of yacc.c  */
-#line 39 "main.y"
+#line 40 "main.y"
     {;}
     break;
 
   case 7:
 
 /* Line 1455 of yacc.c  */
-#line 44 "main.y"
+#line 45 "main.y"
     {;}
     break;
 
   case 8:
 
 /* Line 1455 of yacc.c  */
-#line 45 "main.y"
+#line 46 "main.y"
     {;}
     break;
 
   case 9:
 
 /* Line 1455 of yacc.c  */
-#line 48 "main.y"
+#line 49 "main.y"
     {;}
     break;
 
   case 10:
 
 /* Line 1455 of yacc.c  */
-#line 49 "main.y"
+#line 50 "main.y"
     {;}
     break;
 
   case 11:
 
 /* Line 1455 of yacc.c  */
-#line 54 "main.y"
+#line 55 "main.y"
     {;}
     break;
 
   case 13:
 
 /* Line 1455 of yacc.c  */
-#line 58 "main.y"
+#line 59 "main.y"
     {;}
     break;
 
   case 14:
 
 /* Line 1455 of yacc.c  */
-#line 61 "main.y"
+#line 62 "main.y"
     {;}
     break;
 
   case 15:
 
 /* Line 1455 of yacc.c  */
-#line 62 "main.y"
+#line 63 "main.y"
     {;}
     break;
 
   case 16:
 
 /* Line 1455 of yacc.c  */
-#line 65 "main.y"
+#line 66 "main.y"
     {;}
     break;
 
   case 18:
 
 /* Line 1455 of yacc.c  */
-#line 69 "main.y"
+#line 70 "main.y"
     {;}
     break;
 
   case 19:
 
 /* Line 1455 of yacc.c  */
-#line 70 "main.y"
+#line 71 "main.y"
     {;}
     break;
 
   case 20:
 
 /* Line 1455 of yacc.c  */
-#line 75 "main.y"
+#line 76 "main.y"
     {;}
     break;
 
   case 21:
 
 /* Line 1455 of yacc.c  */
-#line 78 "main.y"
+#line 79 "main.y"
     {;}
     break;
 
   case 22:
 
 /* Line 1455 of yacc.c  */
-#line 79 "main.y"
+#line 80 "main.y"
     {;}
     break;
 
   case 23:
 
 /* Line 1455 of yacc.c  */
-#line 82 "main.y"
+#line 83 "main.y"
     {;}
     break;
 
   case 24:
 
 /* Line 1455 of yacc.c  */
-#line 83 "main.y"
+#line 84 "main.y"
     {;}
     break;
 
   case 25:
 
 /* Line 1455 of yacc.c  */
-#line 84 "main.y"
+#line 85 "main.y"
     {;}
     break;
 
   case 26:
 
 /* Line 1455 of yacc.c  */
-#line 85 "main.y"
+#line 86 "main.y"
     {;}
     break;
 
   case 27:
 
 /* Line 1455 of yacc.c  */
-#line 86 "main.y"
+#line 87 "main.y"
     {;}
     break;
 
   case 28:
 
 /* Line 1455 of yacc.c  */
-#line 87 "main.y"
+#line 88 "main.y"
     {;}
     break;
 
   case 29:
 
 /* Line 1455 of yacc.c  */
-#line 88 "main.y"
+#line 89 "main.y"
     {;}
     break;
 
   case 32:
 
 /* Line 1455 of yacc.c  */
-#line 95 "main.y"
+#line 96 "main.y"
     {;}
     break;
 
   case 33:
 
 /* Line 1455 of yacc.c  */
-#line 96 "main.y"
+#line 97 "main.y"
     {;}
     break;
 
   case 34:
 
 /* Line 1455 of yacc.c  */
-#line 97 "main.y"
+#line 98 "main.y"
     {;}
     break;
 
   case 35:
 
 /* Line 1455 of yacc.c  */
-#line 98 "main.y"
+#line 99 "main.y"
     {;}
     break;
 
   case 36:
 
 /* Line 1455 of yacc.c  */
-#line 101 "main.y"
+#line 102 "main.y"
     {;}
     break;
 
   case 37:
 
 /* Line 1455 of yacc.c  */
-#line 102 "main.y"
+#line 103 "main.y"
     {;}
     break;
 
   case 38:
 
 /* Line 1455 of yacc.c  */
-#line 107 "main.y"
+#line 108 "main.y"
     {;}
     break;
 
   case 39:
 
 /* Line 1455 of yacc.c  */
-#line 108 "main.y"
+#line 109 "main.y"
     {;}
     break;
 
   case 40:
 
 /* Line 1455 of yacc.c  */
-#line 113 "main.y"
+#line 114 "main.y"
     {;}
     break;
 
   case 41:
 
 /* Line 1455 of yacc.c  */
-#line 114 "main.y"
+#line 115 "main.y"
     {;}
     break;
 
   case 42:
 
 /* Line 1455 of yacc.c  */
-#line 119 "main.y"
+#line 120 "main.y"
     {;}
     break;
 
   case 43:
 
 /* Line 1455 of yacc.c  */
-#line 120 "main.y"
+#line 121 "main.y"
     {;}
     break;
 
   case 44:
 
 /* Line 1455 of yacc.c  */
-#line 125 "main.y"
+#line 126 "main.y"
     {;}
     break;
 
   case 45:
 
 /* Line 1455 of yacc.c  */
-#line 126 "main.y"
+#line 127 "main.y"
     {;}
     break;
 
   case 46:
 
 /* Line 1455 of yacc.c  */
-#line 131 "main.y"
+#line 132 "main.y"
     {;}
     break;
 
   case 47:
 
 /* Line 1455 of yacc.c  */
-#line 134 "main.y"
+#line 135 "main.y"
     {;}
     break;
 
   case 49:
 
 /* Line 1455 of yacc.c  */
-#line 138 "main.y"
+#line 139 "main.y"
     {;}
     break;
 
   case 50:
 
 /* Line 1455 of yacc.c  */
-#line 139 "main.y"
+#line 140 "main.y"
     {;}
     break;
 
   case 51:
 
 /* Line 1455 of yacc.c  */
-#line 144 "main.y"
+#line 145 "main.y"
     {;}
     break;
 
   case 52:
 
 /* Line 1455 of yacc.c  */
-#line 145 "main.y"
+#line 146 "main.y"
     {;}
     break;
 
   case 53:
 
 /* Line 1455 of yacc.c  */
-#line 146 "main.y"
+#line 147 "main.y"
     {;}
     break;
 
   case 54:
 
 /* Line 1455 of yacc.c  */
-#line 149 "main.y"
+#line 150 "main.y"
     {;}
     break;
 
   case 55:
 
 /* Line 1455 of yacc.c  */
-#line 152 "main.y"
+#line 153 "main.y"
     {;}
     break;
 
   case 56:
 
 /* Line 1455 of yacc.c  */
-#line 153 "main.y"
+#line 154 "main.y"
     {;}
     break;
 
   case 57:
 
 /* Line 1455 of yacc.c  */
-#line 156 "main.y"
+#line 157 "main.y"
     {;}
     break;
 
   case 58:
 
 /* Line 1455 of yacc.c  */
-#line 157 "main.y"
+#line 158 "main.y"
     {;}
     break;
 
   case 59:
 
 /* Line 1455 of yacc.c  */
-#line 160 "main.y"
+#line 161 "main.y"
     {;}
     break;
 
   case 60:
 
 /* Line 1455 of yacc.c  */
-#line 161 "main.y"
+#line 162 "main.y"
     {;}
     break;
 
   case 61:
 
 /* Line 1455 of yacc.c  */
-#line 162 "main.y"
+#line 163 "main.y"
     {;}
     break;
 
   case 62:
 
 /* Line 1455 of yacc.c  */
-#line 163 "main.y"
+#line 164 "main.y"
     {;}
     break;
 
   case 63:
 
 /* Line 1455 of yacc.c  */
-#line 164 "main.y"
+#line 165 "main.y"
     {;}
     break;
 
   case 64:
 
 /* Line 1455 of yacc.c  */
-#line 165 "main.y"
+#line 166 "main.y"
     {;}
     break;
 
   case 65:
 
 /* Line 1455 of yacc.c  */
-#line 169 "main.y"
+#line 170 "main.y"
     {;}
     break;
 
   case 66:
 
 /* Line 1455 of yacc.c  */
-#line 170 "main.y"
+#line 171 "main.y"
     {;}
     break;
 
   case 67:
 
 /* Line 1455 of yacc.c  */
-#line 173 "main.y"
+#line 174 "main.y"
     {;}
     break;
 
   case 68:
 
 /* Line 1455 of yacc.c  */
-#line 174 "main.y"
+#line 175 "main.y"
     {;}
     break;
 
   case 69:
 
 /* Line 1455 of yacc.c  */
-#line 175 "main.y"
+#line 176 "main.y"
     {;}
     break;
 
   case 70:
 
 /* Line 1455 of yacc.c  */
-#line 176 "main.y"
+#line 177 "main.y"
     {;}
     break;
 
   case 71:
 
 /* Line 1455 of yacc.c  */
-#line 177 "main.y"
+#line 178 "main.y"
     {;}
     break;
 
   case 72:
 
 /* Line 1455 of yacc.c  */
-#line 178 "main.y"
+#line 179 "main.y"
     {;}
     break;
 
   case 73:
 
 /* Line 1455 of yacc.c  */
-#line 181 "main.y"
+#line 182 "main.y"
     {;}
     break;
 
   case 74:
 
 /* Line 1455 of yacc.c  */
-#line 182 "main.y"
+#line 183 "main.y"
     {;}
     break;
 
   case 75:
 
 /* Line 1455 of yacc.c  */
-#line 185 "main.y"
+#line 186 "main.y"
     {;}
     break;
 
   case 76:
 
 /* Line 1455 of yacc.c  */
-#line 186 "main.y"
+#line 187 "main.y"
     {;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 1981 "main.tab.c"
+#line 1982 "main.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2189,7 +2190,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 188 "main.y"
+#line 189 "main.y"
 
 
 int yyerror(char *s) {
