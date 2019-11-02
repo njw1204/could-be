@@ -71,15 +71,20 @@
 #line 1 "main.y"
 
 #include <stdio.h>
+#include <string.h>
+#include "hashtable.h"
 int yylex();
 int yyerror(char *s);
+void prepareParse();
 extern int yylineno;
 
+int errorCount = 0;
 FILE *yyin;
+HashTable subprogramTable;
 
 
 /* Line 189 of yacc.c  */
-#line 83 "main.tab.c"
+#line 88 "main.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -99,6 +104,17 @@ FILE *yyin;
 # define YYTOKEN_TABLE 0
 #endif
 
+/* "%code requires" blocks.  */
+
+/* Line 209 of yacc.c  */
+#line 60 "main.y"
+
+	#include "yynode.h"
+
+
+
+/* Line 209 of yacc.c  */
+#line 118 "main.tab.c"
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -142,16 +158,17 @@ typedef union YYSTYPE
 {
 
 /* Line 214 of yacc.c  */
-#line 48 "main.y"
+#line 64 "main.y"
 
 	char name[1024];
 	int intData;
 	float floatData;
+	struct YYNode nodeData;
 
 
 
 /* Line 214 of yacc.c  */
-#line 155 "main.tab.c"
+#line 172 "main.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -163,7 +180,7 @@ typedef union YYSTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 167 "main.tab.c"
+#line 184 "main.tab.c"
 
 #ifdef short
 # undef short
@@ -477,16 +494,16 @@ static const yytype_int8 yyrhs[] =
 };
 
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
-static const yytype_uint8 yyrline[] =
+static const yytype_uint16 yyrline[] =
 {
-       0,    57,    57,    62,    63,    66,    67,    72,    73,    76,
-      77,    82,    83,    86,    89,    90,    93,    94,    97,    98,
-     103,   106,   107,   110,   111,   112,   113,   114,   115,   116,
-     117,   118,   123,   124,   125,   126,   129,   130,   135,   136,
-     141,   142,   147,   148,   153,   154,   159,   162,   163,   166,
-     167,   172,   173,   174,   177,   180,   181,   184,   185,   188,
-     189,   190,   191,   192,   193,   198,   199,   202,   203,   204,
-     205,   206,   207,   210,   211,   214,   215
+       0,    74,    74,    79,    80,    83,    84,    89,    90,    93,
+      94,    99,   100,   103,   109,   116,   125,   126,   129,   130,
+     135,   138,   139,   142,   143,   144,   145,   146,   147,   148,
+     149,   150,   155,   156,   157,   158,   161,   162,   167,   168,
+     173,   174,   179,   180,   185,   186,   191,   205,   206,   209,
+     210,   215,   216,   217,   220,   223,   224,   227,   228,   231,
+     232,   233,   234,   235,   236,   241,   242,   245,   246,   247,
+     248,   249,   250,   253,   254,   257,   258
 };
 #endif
 
@@ -1487,490 +1504,530 @@ yyreduce:
         case 2:
 
 /* Line 1455 of yacc.c  */
-#line 57 "main.y"
-    { ;}
+#line 74 "main.y"
+    {;}
     break;
 
   case 3:
 
 /* Line 1455 of yacc.c  */
-#line 62 "main.y"
+#line 79 "main.y"
     {;}
     break;
 
   case 5:
 
 /* Line 1455 of yacc.c  */
-#line 66 "main.y"
-    {;}
+#line 83 "main.y"
+    { (yyval.intData) = 1; ;}
     break;
 
   case 6:
 
 /* Line 1455 of yacc.c  */
-#line 67 "main.y"
-    {;}
+#line 84 "main.y"
+    { (yyval.intData) = (yyvsp[(3) - (3)].intData) + 1; ;}
     break;
 
   case 7:
-
-/* Line 1455 of yacc.c  */
-#line 72 "main.y"
-    {;}
-    break;
-
-  case 8:
-
-/* Line 1455 of yacc.c  */
-#line 73 "main.y"
-    {;}
-    break;
-
-  case 9:
-
-/* Line 1455 of yacc.c  */
-#line 76 "main.y"
-    {;}
-    break;
-
-  case 10:
-
-/* Line 1455 of yacc.c  */
-#line 77 "main.y"
-    {;}
-    break;
-
-  case 11:
-
-/* Line 1455 of yacc.c  */
-#line 82 "main.y"
-    {;}
-    break;
-
-  case 13:
-
-/* Line 1455 of yacc.c  */
-#line 86 "main.y"
-    {;}
-    break;
-
-  case 14:
 
 /* Line 1455 of yacc.c  */
 #line 89 "main.y"
     {;}
     break;
 
-  case 15:
+  case 8:
 
 /* Line 1455 of yacc.c  */
 #line 90 "main.y"
     {;}
     break;
 
-  case 16:
+  case 9:
 
 /* Line 1455 of yacc.c  */
 #line 93 "main.y"
     {;}
     break;
 
+  case 10:
+
+/* Line 1455 of yacc.c  */
+#line 94 "main.y"
+    {;}
+    break;
+
+  case 11:
+
+/* Line 1455 of yacc.c  */
+#line 99 "main.y"
+    {;}
+    break;
+
+  case 13:
+
+/* Line 1455 of yacc.c  */
+#line 103 "main.y"
+    {
+		YYNode node = (yyvsp[(1) - (3)].nodeData);
+		insertToHashTable(&subprogramTable, node.sParam[0], node);
+	;}
+    break;
+
+  case 14:
+
+/* Line 1455 of yacc.c  */
+#line 109 "main.y"
+    {
+		YYNode node;
+		node.type = T_FUNCTION;
+		node.iParam[0] = (yyvsp[(3) - (6)].intData); // 인자 개수
+		strcpy(node.sParam[0], (yyvsp[(2) - (6)].name)); // 함수 이름
+		(yyval.nodeData) = node;
+	;}
+    break;
+
+  case 15:
+
+/* Line 1455 of yacc.c  */
+#line 116 "main.y"
+    {
+		YYNode node;
+		node.type = T_PROCEDURE;
+		node.iParam[0] = (yyvsp[(3) - (4)].intData); // 인자 개수
+		strcpy(node.sParam[0], (yyvsp[(2) - (4)].name)); // 프로시저 이름
+		(yyval.nodeData) = node;
+	;}
+    break;
+
+  case 16:
+
+/* Line 1455 of yacc.c  */
+#line 125 "main.y"
+    { (yyval.intData) = (yyvsp[(2) - (3)].intData); ;}
+    break;
+
+  case 17:
+
+/* Line 1455 of yacc.c  */
+#line 126 "main.y"
+    { (yyval.intData) = 0; ;}
+    break;
+
   case 18:
 
 /* Line 1455 of yacc.c  */
-#line 97 "main.y"
-    {;}
+#line 129 "main.y"
+    { (yyval.intData) = (yyvsp[(1) - (3)].intData); ;}
     break;
 
   case 19:
 
 /* Line 1455 of yacc.c  */
-#line 98 "main.y"
-    {;}
+#line 130 "main.y"
+    { (yyval.intData) = (yyvsp[(1) - (5)].intData) + (yyvsp[(5) - (5)].intData); ;}
     break;
 
   case 20:
-
-/* Line 1455 of yacc.c  */
-#line 103 "main.y"
-    {;}
-    break;
-
-  case 21:
-
-/* Line 1455 of yacc.c  */
-#line 106 "main.y"
-    {;}
-    break;
-
-  case 22:
-
-/* Line 1455 of yacc.c  */
-#line 107 "main.y"
-    {;}
-    break;
-
-  case 23:
-
-/* Line 1455 of yacc.c  */
-#line 110 "main.y"
-    {;}
-    break;
-
-  case 24:
-
-/* Line 1455 of yacc.c  */
-#line 111 "main.y"
-    {;}
-    break;
-
-  case 25:
-
-/* Line 1455 of yacc.c  */
-#line 112 "main.y"
-    {;}
-    break;
-
-  case 26:
-
-/* Line 1455 of yacc.c  */
-#line 113 "main.y"
-    {;}
-    break;
-
-  case 27:
-
-/* Line 1455 of yacc.c  */
-#line 114 "main.y"
-    {;}
-    break;
-
-  case 28:
-
-/* Line 1455 of yacc.c  */
-#line 115 "main.y"
-    {;}
-    break;
-
-  case 29:
-
-/* Line 1455 of yacc.c  */
-#line 116 "main.y"
-    {;}
-    break;
-
-  case 32:
-
-/* Line 1455 of yacc.c  */
-#line 123 "main.y"
-    {;}
-    break;
-
-  case 33:
-
-/* Line 1455 of yacc.c  */
-#line 124 "main.y"
-    {;}
-    break;
-
-  case 34:
-
-/* Line 1455 of yacc.c  */
-#line 125 "main.y"
-    {;}
-    break;
-
-  case 35:
-
-/* Line 1455 of yacc.c  */
-#line 126 "main.y"
-    {;}
-    break;
-
-  case 36:
-
-/* Line 1455 of yacc.c  */
-#line 129 "main.y"
-    {;}
-    break;
-
-  case 37:
-
-/* Line 1455 of yacc.c  */
-#line 130 "main.y"
-    {;}
-    break;
-
-  case 38:
 
 /* Line 1455 of yacc.c  */
 #line 135 "main.y"
     {;}
     break;
 
-  case 39:
+  case 21:
 
 /* Line 1455 of yacc.c  */
-#line 136 "main.y"
+#line 138 "main.y"
     {;}
     break;
 
-  case 40:
+  case 22:
 
 /* Line 1455 of yacc.c  */
-#line 141 "main.y"
+#line 139 "main.y"
     {;}
     break;
 
-  case 41:
+  case 23:
 
 /* Line 1455 of yacc.c  */
 #line 142 "main.y"
     {;}
     break;
 
-  case 42:
+  case 24:
+
+/* Line 1455 of yacc.c  */
+#line 143 "main.y"
+    {;}
+    break;
+
+  case 25:
+
+/* Line 1455 of yacc.c  */
+#line 144 "main.y"
+    {;}
+    break;
+
+  case 26:
+
+/* Line 1455 of yacc.c  */
+#line 145 "main.y"
+    {;}
+    break;
+
+  case 27:
+
+/* Line 1455 of yacc.c  */
+#line 146 "main.y"
+    {;}
+    break;
+
+  case 28:
 
 /* Line 1455 of yacc.c  */
 #line 147 "main.y"
     {;}
     break;
 
-  case 43:
+  case 29:
 
 /* Line 1455 of yacc.c  */
 #line 148 "main.y"
     {;}
     break;
 
-  case 44:
+  case 32:
 
 /* Line 1455 of yacc.c  */
-#line 153 "main.y"
+#line 155 "main.y"
     {;}
     break;
 
-  case 45:
+  case 33:
 
 /* Line 1455 of yacc.c  */
-#line 154 "main.y"
+#line 156 "main.y"
     {;}
     break;
 
-  case 46:
+  case 34:
 
 /* Line 1455 of yacc.c  */
-#line 159 "main.y"
+#line 157 "main.y"
     {;}
     break;
 
-  case 47:
+  case 35:
+
+/* Line 1455 of yacc.c  */
+#line 158 "main.y"
+    {;}
+    break;
+
+  case 36:
+
+/* Line 1455 of yacc.c  */
+#line 161 "main.y"
+    {;}
+    break;
+
+  case 37:
 
 /* Line 1455 of yacc.c  */
 #line 162 "main.y"
     {;}
     break;
 
-  case 49:
-
-/* Line 1455 of yacc.c  */
-#line 166 "main.y"
-    {;}
-    break;
-
-  case 50:
+  case 38:
 
 /* Line 1455 of yacc.c  */
 #line 167 "main.y"
     {;}
     break;
 
-  case 51:
+  case 39:
 
 /* Line 1455 of yacc.c  */
-#line 172 "main.y"
+#line 168 "main.y"
     {;}
     break;
 
-  case 52:
+  case 40:
 
 /* Line 1455 of yacc.c  */
 #line 173 "main.y"
     {;}
     break;
 
-  case 53:
+  case 41:
 
 /* Line 1455 of yacc.c  */
 #line 174 "main.y"
     {;}
     break;
 
-  case 54:
+  case 42:
 
 /* Line 1455 of yacc.c  */
-#line 177 "main.y"
+#line 179 "main.y"
     {;}
     break;
 
-  case 55:
+  case 43:
 
 /* Line 1455 of yacc.c  */
 #line 180 "main.y"
     {;}
     break;
 
-  case 56:
-
-/* Line 1455 of yacc.c  */
-#line 181 "main.y"
-    {;}
-    break;
-
-  case 57:
-
-/* Line 1455 of yacc.c  */
-#line 184 "main.y"
-    {;}
-    break;
-
-  case 58:
+  case 44:
 
 /* Line 1455 of yacc.c  */
 #line 185 "main.y"
     {;}
     break;
 
-  case 59:
+  case 45:
 
 /* Line 1455 of yacc.c  */
-#line 188 "main.y"
+#line 186 "main.y"
     {;}
     break;
 
-  case 60:
-
-/* Line 1455 of yacc.c  */
-#line 189 "main.y"
-    {;}
-    break;
-
-  case 61:
-
-/* Line 1455 of yacc.c  */
-#line 190 "main.y"
-    {;}
-    break;
-
-  case 62:
+  case 46:
 
 /* Line 1455 of yacc.c  */
 #line 191 "main.y"
-    {;}
+    {
+		char buf[2048] = {0};
+		YYNode *nodePtr = findFromHashTable(&subprogramTable, (yyvsp[(1) - (4)].name));
+		if (nodePtr == NULL) {
+			sprintf(buf, "undeclared subprogram \"%s\"", (yyvsp[(1) - (4)].name));
+			yyerror(buf);
+		}
+		else if (nodePtr->iParam[0] != (yyvsp[(3) - (4)].intData)) {
+			sprintf(buf, "\"%s\" expect %d parameters, but %d given", (yyvsp[(1) - (4)].name), nodePtr->iParam[0], (yyvsp[(3) - (4)].intData));
+			yyerror(buf);
+		}
+	;}
     break;
 
-  case 63:
-
-/* Line 1455 of yacc.c  */
-#line 192 "main.y"
-    {;}
-    break;
-
-  case 64:
-
-/* Line 1455 of yacc.c  */
-#line 193 "main.y"
-    {;}
-    break;
-
-  case 65:
-
-/* Line 1455 of yacc.c  */
-#line 198 "main.y"
-    {;}
-    break;
-
-  case 66:
-
-/* Line 1455 of yacc.c  */
-#line 199 "main.y"
-    {;}
-    break;
-
-  case 67:
-
-/* Line 1455 of yacc.c  */
-#line 202 "main.y"
-    {;}
-    break;
-
-  case 68:
-
-/* Line 1455 of yacc.c  */
-#line 203 "main.y"
-    {;}
-    break;
-
-  case 69:
-
-/* Line 1455 of yacc.c  */
-#line 204 "main.y"
-    {;}
-    break;
-
-  case 70:
+  case 47:
 
 /* Line 1455 of yacc.c  */
 #line 205 "main.y"
-    {;}
+    { (yyval.intData) = (yyvsp[(1) - (1)].intData); ;}
     break;
 
-  case 71:
+  case 48:
 
 /* Line 1455 of yacc.c  */
 #line 206 "main.y"
-    {;}
+    { (yyval.intData) = 0; ;}
     break;
 
-  case 72:
+  case 49:
 
 /* Line 1455 of yacc.c  */
-#line 207 "main.y"
-    {;}
+#line 209 "main.y"
+    { (yyval.intData) = 1; ;}
     break;
 
-  case 73:
+  case 50:
 
 /* Line 1455 of yacc.c  */
 #line 210 "main.y"
-    {;}
+    { (yyval.intData) = (yyvsp[(3) - (3)].intData) + 1; ;}
     break;
 
-  case 74:
-
-/* Line 1455 of yacc.c  */
-#line 211 "main.y"
-    {;}
-    break;
-
-  case 75:
-
-/* Line 1455 of yacc.c  */
-#line 214 "main.y"
-    {;}
-    break;
-
-  case 76:
+  case 51:
 
 /* Line 1455 of yacc.c  */
 #line 215 "main.y"
     {;}
     break;
 
+  case 52:
+
+/* Line 1455 of yacc.c  */
+#line 216 "main.y"
+    {;}
+    break;
+
+  case 53:
+
+/* Line 1455 of yacc.c  */
+#line 217 "main.y"
+    {;}
+    break;
+
+  case 54:
+
+/* Line 1455 of yacc.c  */
+#line 220 "main.y"
+    {;}
+    break;
+
+  case 55:
+
+/* Line 1455 of yacc.c  */
+#line 223 "main.y"
+    {;}
+    break;
+
+  case 56:
+
+/* Line 1455 of yacc.c  */
+#line 224 "main.y"
+    {;}
+    break;
+
+  case 57:
+
+/* Line 1455 of yacc.c  */
+#line 227 "main.y"
+    {;}
+    break;
+
+  case 58:
+
+/* Line 1455 of yacc.c  */
+#line 228 "main.y"
+    {;}
+    break;
+
+  case 59:
+
+/* Line 1455 of yacc.c  */
+#line 231 "main.y"
+    {;}
+    break;
+
+  case 60:
+
+/* Line 1455 of yacc.c  */
+#line 232 "main.y"
+    {;}
+    break;
+
+  case 61:
+
+/* Line 1455 of yacc.c  */
+#line 233 "main.y"
+    {;}
+    break;
+
+  case 62:
+
+/* Line 1455 of yacc.c  */
+#line 234 "main.y"
+    {;}
+    break;
+
+  case 63:
+
+/* Line 1455 of yacc.c  */
+#line 235 "main.y"
+    {;}
+    break;
+
+  case 64:
+
+/* Line 1455 of yacc.c  */
+#line 236 "main.y"
+    {;}
+    break;
+
+  case 65:
+
+/* Line 1455 of yacc.c  */
+#line 241 "main.y"
+    {;}
+    break;
+
+  case 66:
+
+/* Line 1455 of yacc.c  */
+#line 242 "main.y"
+    {;}
+    break;
+
+  case 67:
+
+/* Line 1455 of yacc.c  */
+#line 245 "main.y"
+    {;}
+    break;
+
+  case 68:
+
+/* Line 1455 of yacc.c  */
+#line 246 "main.y"
+    {;}
+    break;
+
+  case 69:
+
+/* Line 1455 of yacc.c  */
+#line 247 "main.y"
+    {;}
+    break;
+
+  case 70:
+
+/* Line 1455 of yacc.c  */
+#line 248 "main.y"
+    {;}
+    break;
+
+  case 71:
+
+/* Line 1455 of yacc.c  */
+#line 249 "main.y"
+    {;}
+    break;
+
+  case 72:
+
+/* Line 1455 of yacc.c  */
+#line 250 "main.y"
+    {;}
+    break;
+
+  case 73:
+
+/* Line 1455 of yacc.c  */
+#line 253 "main.y"
+    {;}
+    break;
+
+  case 74:
+
+/* Line 1455 of yacc.c  */
+#line 254 "main.y"
+    {;}
+    break;
+
+  case 75:
+
+/* Line 1455 of yacc.c  */
+#line 257 "main.y"
+    {;}
+    break;
+
+  case 76:
+
+/* Line 1455 of yacc.c  */
+#line 258 "main.y"
+    {;}
+    break;
+
 
 
 /* Line 1455 of yacc.c  */
-#line 1974 "main.tab.c"
+#line 2031 "main.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2182,20 +2239,34 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 218 "main.y"
+#line 261 "main.y"
 
 
 int yyerror(char *s) {
-	printf("Compile Fail: %s at line %d\n", s, yylineno);
+	printf("Error: %s at line %d\n", s, yylineno);
+	errorCount++;
 	return 0;
+}
+
+void prepareParse() {
+	subprogramTable = createHashTable();
 }
 
 int main(int argc, char *argv[]) {
 	if (argc == 2) {
 		yyin = fopen(argv[1], "r");
 		if (yyin) {
+			prepareParse();
 			if (yyparse() == 0) {
-				printf("Compile OK\n");
+				if (errorCount == 0) {
+					printf("[Compile OK]\n");
+				}
+				else {
+					printf("[Compile Fail]\n");
+				}
+			}
+			else {
+				printf("[Compile Fail]\n");
 			}
 			fclose(yyin);
 		}

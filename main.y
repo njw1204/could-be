@@ -1,10 +1,15 @@
 %{
 #include <stdio.h>
+#include <string.h>
+#include "hashtable.h"
 int yylex();
 int yyerror(char *s);
+void prepareParse();
 extern int yylineno;
 
+int errorCount = 0;
 FILE *yyin;
+HashTable subprogramTable;
 %}
 
 %error-verbose
@@ -45,16 +50,28 @@ FILE *yyin;
 %type <intData> INTEGER
 %type <floatData> FLOAT
 
+%type <intData> identifier_list // 식별자 개수
+%type <nodeData> subprogram_head // 함수 정보
+%type <intData> parameter_list // 함수 호출 파라미터 개수
+%type <intData> arguments // 함수 호출 파라미터 개수
+%type <intData> actual_parameter_expression // 식 개수
+%type <intData> expression_list // 식 개수
+
+%code requires {
+	#include "yynode.h"
+}
+
 %union {
 	char name[1024];
 	int intData;
 	float floatData;
+	struct YYNode nodeData;
 }
 
 %%
 
 program:
-	MAINPROG ID ';' declarations subprogram_declarations compound_statement { }
+	MAINPROG ID ';' declarations subprogram_declarations compound_statement {}
 ;
 
 
@@ -63,8 +80,8 @@ declarations:
 	|
 ;
 identifier_list:
-	ID {}
-	| ID ',' identifier_list {}
+	ID { $$ = 1; }
+	| ID ',' identifier_list { $$ = $3 + 1; }
 ;
 
 
@@ -83,19 +100,34 @@ subprogram_declarations:
 	|
 ;
 subprogram_declaration:
-	subprogram_head declarations compound_statement {}
+	subprogram_head declarations compound_statement {
+		YYNode node = $1;
+		insertToHashTable(&subprogramTable, node.sParam[0], node);
+	}
 ;
 subprogram_head:
-	FUNCTION ID arguments ':' standard_type ';' {}
-	| PROCEDURE ID arguments ';' {}
+	FUNCTION ID arguments ':' standard_type ';' {
+		YYNode node;
+		node.type = T_FUNCTION;
+		node.iParam[0] = $3; // 인자 개수
+		strcpy(node.sParam[0], $2); // 함수 이름
+		$$ = node;
+	}
+	| PROCEDURE ID arguments ';' {
+		YYNode node;
+		node.type = T_PROCEDURE;
+		node.iParam[0] = $3; // 인자 개수
+		strcpy(node.sParam[0], $2); // 프로시저 이름
+		$$ = node;
+	}
 ;
 arguments:
-	'(' parameter_list ')' {}
-	|
+	'(' parameter_list ')' { $$ = $2; }
+	| { $$ = 0; }
 ;
 parameter_list:
-	identifier_list ':' type {}
-	| identifier_list ':' type ';' parameter_list{}
+	identifier_list ':' type { $$ = $1; }
+	| identifier_list ':' type ';' parameter_list { $$ = $1 + $5; }
 ;
 
 
@@ -156,15 +188,26 @@ variable:
 
 
 procedure_statement:
-	ID '(' actual_parameter_expression ')' {}
+	ID '(' actual_parameter_expression ')' {
+		char buf[2048] = {0};
+		YYNode *nodePtr = findFromHashTable(&subprogramTable, $1);
+		if (nodePtr == NULL) {
+			sprintf(buf, "undeclared subprogram \"%s\"", $1);
+			yyerror(buf);
+		}
+		else if (nodePtr->iParam[0] != $3) {
+			sprintf(buf, "\"%s\" expect %d parameters, but %d given", $1, nodePtr->iParam[0], $3);
+			yyerror(buf);
+		}
+	}
 ;
 actual_parameter_expression:
-	expression_list {}
-	|
+	expression_list { $$ = $1; }
+	| { $$ = 0; }
 ;
 expression_list:
-	expression {}
-	| expression ',' expression_list {}
+	expression { $$ = 1; }
+	| expression ',' expression_list { $$ = $3 + 1; }
 ;
 
 
@@ -218,16 +261,30 @@ multop:
 %%
 
 int yyerror(char *s) {
-	printf("Compile Fail: %s at line %d\n", s, yylineno);
+	printf("Error: %s at line %d\n", s, yylineno);
+	errorCount++;
 	return 0;
+}
+
+void prepareParse() {
+	subprogramTable = createHashTable();
 }
 
 int main(int argc, char *argv[]) {
 	if (argc == 2) {
 		yyin = fopen(argv[1], "r");
 		if (yyin) {
+			prepareParse();
 			if (yyparse() == 0) {
-				printf("Compile OK\n");
+				if (errorCount == 0) {
+					printf("[Compile OK]\n");
+				}
+				else {
+					printf("[Compile Fail]\n");
+				}
+			}
+			else {
+				printf("[Compile Fail]\n");
 			}
 			fclose(yyin);
 		}

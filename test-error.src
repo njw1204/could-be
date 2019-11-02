@@ -2,12 +2,12 @@ mainprog mucheol;
 int[100] x,z123;
 float y;
 
-function muchul (sex:int;fuck:float;fuckfuckfuck:int) : ;
+function muchul (sex:int;fuck:float;fuckfuckfuck:int) : float;
 	int[100] x, z123;
 	begin
 		x=3.12
 	end
-procedure muchul (sex:int;fuck:float);
+procedure couldbe (sex:int;fuck:float);
 	int[100] x, z123;
 	begin
 		a=.3
@@ -31,10 +31,11 @@ begin
 		else:
 			begin
 				nimisaaweljfnwalej();
+				couldbe(1,2);
 				while 1!=2:
 					begin
 						fuksdlajfkwlaejf(-1123123.23231241240000);
-						couldbecoubldalfje(a,b,c,d+2)
+						muchul(-1123123.23231241240000, 2, 3.4, 5)
 					end
 			end
 	end;
