@@ -75,7 +75,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 46 "main.y"
+#line 48 "main.y"
 
 	char name[1024];
 	int intData;

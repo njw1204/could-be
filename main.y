@@ -3,6 +3,8 @@
 int yylex();
 int yyerror(char *s);
 extern int yylineno;
+
+FILE *yyin;
 %}
 
 %error-verbose
@@ -220,9 +222,24 @@ int yyerror(char *s) {
 	return 0;
 }
 
-int main() {
-	if (yyparse() == 0) {
-		printf("Compile OK\n");
+int main(int argc, char *argv[]) {
+	if (argc == 2) {
+		yyin = fopen(argv[1], "r");
+		if (yyin) {
+			if (yyparse() == 0) {
+				printf("Compile OK\n");
+			}
+			fclose(yyin);
+		}
+		else {
+			printf("Error: Can't open the file (%s)\n", argv[1]);
+		}
+	}
+	else if (argc > 2) {
+		printf("Error: Please enter only one argument\n");
+	}
+	else {
+		printf("Error: Please enter source file name as command line argument\n");
 	}
 	return 0;
 }
