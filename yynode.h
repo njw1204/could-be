@@ -1,8 +1,8 @@
 #pragma once
 
 typedef enum YYNodeType {
-    T_NONE = 0,
-    T_FUNCTION,
+    T_NONE,
+    T_FUNCTION = 70770770,
     T_PROCEDURE
 } YYNodeType;
 

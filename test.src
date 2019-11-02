@@ -30,7 +30,7 @@ begin
 			print(hi)
 		else:
 			begin
-				muchul(1, 2, 3);
+				y = muchul(1, 2, 3);
 				while 1!=2:
 					begin
 						muchul(-1123123.23231241240000, 2, 3);

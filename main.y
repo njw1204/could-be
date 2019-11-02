@@ -9,7 +9,8 @@ extern int yylineno;
 
 int errorCount = 0;
 FILE *yyin;
-HashTable subprogramTable;
+HashTable symbolTable;
+char buf[2048] = {0};
 %}
 
 %error-verbose
@@ -56,6 +57,7 @@ HashTable subprogramTable;
 %type <intData> arguments // 함수 호출 파라미터 개수
 %type <intData> actual_parameter_expression // 식 개수
 %type <intData> expression_list // 식 개수
+%type <nodeData> procedure_statement // 함수 정보
 
 %code requires {
 	#include "yynode.h"
@@ -102,7 +104,13 @@ subprogram_declarations:
 subprogram_declaration:
 	subprogram_head declarations compound_statement {
 		YYNode node = $1;
-		insertToHashTable(&subprogramTable, node.sParam[0], node);
+		if (!findFromHashTable(&symbolTable, node.sParam[0])) {
+			insertToHashTable(&symbolTable, node.sParam[0], node);
+		}
+		else {
+			sprintf(buf, "identifier \"%s\" is declared duplicately", node.sParam[0]);
+			yyerror(buf);
+		}
 	}
 ;
 subprogram_head:
@@ -189,15 +197,24 @@ variable:
 
 procedure_statement:
 	ID '(' actual_parameter_expression ')' {
-		char buf[2048] = {0};
-		YYNode *nodePtr = findFromHashTable(&subprogramTable, $1);
+		YYNode *nodePtr = findFromHashTable(&symbolTable, $1);
 		if (nodePtr == NULL) {
-			sprintf(buf, "undeclared subprogram \"%s\"", $1);
+			sprintf(buf, "undeclared identifier \"%s\"", $1);
 			yyerror(buf);
+			$$.type = T_NONE;
+		}
+		else if (nodePtr->type != T_FUNCTION && nodePtr->type != T_PROCEDURE) {
+			sprintf(buf, "\"%s\" is not function or procedure", $1);
+			yyerror(buf);
+			$$.type = T_NONE;
 		}
 		else if (nodePtr->iParam[0] != $3) {
-			sprintf(buf, "\"%s\" expect %d parameters, but %d given", $1, nodePtr->iParam[0], $3);
+			sprintf(buf, "\"%s\" expect %d parameter, but %d given", $1, nodePtr->iParam[0], $3);
 			yyerror(buf);
+			$$ = *nodePtr;
+		}
+		else {
+			$$ = *nodePtr;
 		}
 	}
 ;
@@ -231,7 +248,13 @@ factor:
 	INTEGER {}
 	| FLOAT {}
 	| variable {}
-	| procedure_statement {}
+	| procedure_statement {
+		YYNode node = $1;
+		if (node.type != T_NONE && node.type != T_FUNCTION) {
+			sprintf(buf, "\"%s\" is not function so it doesn't have return value", node.sParam[0]);
+			yyerror(buf);
+		}
+	}
 	| '!' factor {}
 	| sign factor {}
 ;
@@ -267,7 +290,7 @@ int yyerror(char *s) {
 }
 
 void prepareParse() {
-	subprogramTable = createHashTable();
+	symbolTable = createHashTable();
 }
 
 int main(int argc, char *argv[]) {

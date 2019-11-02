@@ -13,13 +13,18 @@ procedure couldbe (sex:int;fuck:float);
 		a=.3
 	end
 
+function muchul: int;
+	begin
+		nop
+	end
+
 begin
 	for muchul in bongbong:
 	begin
 		fuckfuckfuck = a + b * c - d / efg01230;
 		if fuckfuckfuck == 1:
 			begin
-				couldbe(123123);
+				x=couldbe(123123);
 				fuckfuckfuck = 1
 			end
 		elif fuckfuckfuck == 2:
