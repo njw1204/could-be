@@ -5,14 +5,15 @@ int yyerror(char *s);
 extern int yylineno;
 %}
 
-%token MAINPROG FUNCTION PROCEDURE BEGIN_BODY END_BODY IF THEN ELIF ELSE NOP WHILE FOR RETURN PRINT IN TYPE_INT TYPE_FLOAT ID INTEGER FLOAT OTHER
-%token OP_PLUS OP_MINUS OP_MULT OP_DIV OP_LT OP_GT OP_NE OP_LE OP_GE OP_EQ OP_NOT
-%token DE_SEMICOLON DE_COMMA DE_DOT DE_ASSIGN DE_LP DE_RP DE_LSB DE_RSB DE_COLON
+%token TYPE_INT TYPE_FLOAT
+%token MAINPROG FUNCTION PROCEDURE BEGIN_BODY END_BODY IF THEN ELIF ELSE NOP WHILE FOR RETURN PRINT IN
+%token ID FLOAT INTEGER
+%token OP_EQ OP_NE OP_LE OP_GE OP_LT OP_GT
 
-%right DE_COLON ELIF ELSE
-%left OP_LT OP_GT OP_NE OP_LE OP_GE OP_EQ IN
-%left OP_PLUS OP_MINUS
-%left OP_MULT OP_DIV
+%right ':' ELIF ELSE
+%left OP_EQ OP_NE OP_LE OP_GE OP_LT OP_GT IN
+%left '+' '-'
+%left '*' '/'
 
 %type <name> ID
 %type <intData> INTEGER
@@ -27,23 +28,23 @@ extern int yylineno;
 %%
 
 program:
-	MAINPROG ID DE_SEMICOLON declarations subprogram_declarations compound_statement { }
+	MAINPROG ID ';' declarations subprogram_declarations compound_statement { }
 ;
 
 
 declarations:
-	type identifier_list DE_SEMICOLON declarations {}
+	type identifier_list ';' declarations {}
 	|
 ;
 identifier_list:
 	ID {}
-	| ID DE_COMMA identifier_list {}
+	| ID ',' identifier_list {}
 ;
 
 
 type:
 	standard_type {}
-	| standard_type DE_LSB INTEGER DE_RSB {}
+	| standard_type '[' INTEGER ']' {}
 ;
 standard_type:
 	TYPE_INT {}
@@ -59,16 +60,16 @@ subprogram_declaration:
 	subprogram_head declarations compound_statement {}
 ;
 subprogram_head:
-	FUNCTION ID arguments DE_COLON standard_type DE_SEMICOLON {}
-	| PROCEDURE ID arguments DE_SEMICOLON {}
+	FUNCTION ID arguments ':' standard_type ';' {}
+	| PROCEDURE ID arguments ';' {}
 ;
 arguments:
-	DE_LP parameter_list DE_RP {}
+	'(' parameter_list ')' {}
 	|
 ;
 parameter_list:
-	identifier_list DE_COLON type {}
-	| identifier_list DE_COLON type DE_SEMICOLON parameter_list{}
+	identifier_list ':' type {}
+	| identifier_list ':' type ';' parameter_list{}
 ;
 
 
@@ -77,10 +78,10 @@ compound_statement:
 ;
 statement_list:
 	statement {}
-	| statement DE_SEMICOLON statement_list {}
+	| statement ';' statement_list {}
 ;
 statement:
-	variable DE_ASSIGN expression {}
+	variable '=' expression {}
 	| print_statement {}
 	| procedure_statement {}
 	| compound_statement {}
@@ -93,43 +94,43 @@ statement:
 
 
 if_statement:
-	IF expression DE_COLON statement {}
-	| IF expression DE_COLON statement ELSE DE_COLON statement {}
-	| IF expression DE_COLON statement elif_statement {}
-	| IF expression DE_COLON statement elif_statement ELSE DE_COLON statement {}
+	IF expression ':' statement {}
+	| IF expression ':' statement ELSE ':' statement {}
+	| IF expression ':' statement elif_statement {}
+	| IF expression ':' statement elif_statement ELSE ':' statement {}
 ;
 elif_statement:
-	ELIF expression DE_COLON statement elif_statement {}
-	| ELIF expression DE_COLON statement {}
+	ELIF expression ':' statement elif_statement {}
+	| ELIF expression ':' statement {}
 ;
 
 
 while_statement:
-	WHILE expression DE_COLON statement {}
-	| WHILE expression DE_COLON statement ELSE DE_COLON statement {}
+	WHILE expression ':' statement {}
+	| WHILE expression ':' statement ELSE ':' statement {}
 ;
 
 
 for_statement:
-	FOR in_expression DE_COLON statement {}
-	| FOR in_expression DE_COLON statement ELSE DE_COLON statement {}
+	FOR in_expression ':' statement {}
+	| FOR in_expression ':' statement ELSE ':' statement {}
 ;
 
 
 print_statement:
 	PRINT {}
-	| PRINT DE_LP expression DE_RP {}
+	| PRINT '(' expression ')' {}
 ;
 
 
 variable:
 	ID {}
-	| ID DE_LSB expression DE_RSB {}
+	| ID '[' expression ']' {}
 ;
 
 
 procedure_statement:
-	ID DE_LP actual_parameter_expression DE_RP {}
+	ID '(' actual_parameter_expression ')' {}
 ;
 actual_parameter_expression:
 	expression_list {}
@@ -137,7 +138,7 @@ actual_parameter_expression:
 ;
 expression_list:
 	expression {}
-	| expression DE_COMMA expression_list {}
+	| expression ',' expression_list {}
 ;
 
 
@@ -162,13 +163,14 @@ factor:
 	| FLOAT {}
 	| variable {}
 	| procedure_statement {}
-	| OP_NOT factor {}
+	| '!' factor {}
 	| sign factor {}
 ;
 
+
 sign:
-	OP_PLUS {}
-	| OP_MINUS {}
+	'+' {}
+	| '-' {}
 ;
 relop:
 	OP_GT {}
@@ -179,21 +181,24 @@ relop:
 	| OP_NE {}
 ;
 addop:
-	OP_PLUS {}
-	| OP_MINUS {}
+	'+' {}
+	| '-' {}
 ;
 multop:
-	OP_MULT {}
-	| OP_DIV {}
+	'*' {}
+	| '/' {}
 ;
+
 %%
 
 int yyerror(char *s) {
-	printf("Error: %s at line %d\n", s, yylineno);
+	printf("Fail: %s at line %d\n", s, yylineno);
 	return 0;
 }
 
 int main() {
-	yyparse();
+	if (yyparse() == 0) {
+		printf("Compile OK\n");
+	}
 	return 0;
 }

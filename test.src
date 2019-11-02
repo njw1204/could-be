@@ -5,12 +5,12 @@ float y;
 function muchul (sex:int;fuck:float;fuckfuckfuck:int) : int;
 	int[100] x, z123;
 	begin
-		x=3
+		x=3.12
 	end
 procedure muchul (sex:int;fuck:float);
 	int[100] x, z123;
 	begin
-		a=3
+		a=.3
 	end
 
 begin
@@ -26,6 +26,8 @@ begin
 			begin
 				couldbe()
 			end
+		elif 2>1:
+			print(hi)
 		else:
 			begin
 				nimisaaweljfnwalej();
@@ -35,7 +37,6 @@ begin
 						couldbecoubldalfje(a,b,c,d+2)
 					end
 			end
-	end
-	;
+	end;
 	print(bongbong == muchul)
 end
