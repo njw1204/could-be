@@ -2,7 +2,7 @@ mainprog mucheol;
 int[100] x,z123;
 float y;
 
-function muchul (sex:int;fuck:float;fuckfuckfuck:int) : int;
+function muchul (sex:int;fuck:float;fuckfuckfuck:int) : ;
 	int[100] x, z123;
 	begin
 		x=3.12
@@ -17,7 +17,7 @@ begin
 	for muchul in bongbong:
 	begin
 		fuckfuckfuck = a + b * c - d / efg01230;
-		if fuckfuckfuck <= 1:
+		if fuckfuckfuck == 1:
 			begin
 				couldbe(123123);
 				fuckfuckfuck = 1

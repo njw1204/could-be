@@ -5,15 +5,39 @@ int yyerror(char *s);
 extern int yylineno;
 %}
 
-%token TYPE_INT TYPE_FLOAT
-%token MAINPROG FUNCTION PROCEDURE BEGIN_BODY END_BODY IF THEN ELIF ELSE NOP WHILE FOR RETURN PRINT IN
-%token ID FLOAT INTEGER
-%token OP_EQ OP_NE OP_LE OP_GE OP_LT OP_GT
+%error-verbose
+
+%token TYPE_INT "int"
+%token TYPE_FLOAT "float"
+
+%token MAINPROG "mainprog"
+%token FUNCTION "function"
+%token PROCEDURE "procedure"
+%token BEGIN_BODY "begin"
+%token END_BODY "end"
+%token IF "if"
+%token THEN "then"
+%token ELIF "elif"
+%token ELSE "else"
+%token NOP "nop"
+%token WHILE "while"
+%token FOR "for"
+%token RETURN "return"
+%token PRINT "print"
+%token IN "in"
+
+%token ID "identifier"
+%token FLOAT "decimal number"
+%token INTEGER "integer number"
+
+%token OP_EQ "=="
+%token OP_NE "!="
+%token OP_LE "<="
+%token OP_GE ">="
+%token OP_LT "<"
+%token OP_GT ">"
 
 %right ':' ELIF ELSE
-%left OP_EQ OP_NE OP_LE OP_GE OP_LT OP_GT IN
-%left '+' '-'
-%left '*' '/'
 
 %type <name> ID
 %type <intData> INTEGER
@@ -192,7 +216,7 @@ multop:
 %%
 
 int yyerror(char *s) {
-	printf("Fail: %s at line %d\n", s, yylineno);
+	printf("Compile Fail: %s at line %d\n", s, yylineno);
 	return 0;
 }
 
