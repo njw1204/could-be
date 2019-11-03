@@ -8,8 +8,8 @@ List createList() {
 }
 
 void appendToList(List *L, YYNode tdata) {
-	ListNode *newNode = (ListNode *)malloc(sizeof(ListNode));
-	newNode->data = tdata;
+    ListNode *newNode = (ListNode *)malloc(sizeof(ListNode));
+    newNode->data = tdata;
 
     if (*L == NULL) {
         newNode->prev = newNode;

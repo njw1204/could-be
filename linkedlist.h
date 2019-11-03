@@ -4,9 +4,9 @@
 #include "yynode.h"
 
 typedef struct ListNode {
-	YYNode data;
-	struct ListNode *prev;
-	struct ListNode *next;
+    YYNode data;
+    struct ListNode *prev;
+    struct ListNode *next;
 } ListNode;
 
 typedef ListNode *List;
