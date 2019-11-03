@@ -31,6 +31,21 @@ YYNode *findFromHashTable(HashTable *table, const char *key) {
     return NULL;
 }
 
+int removeFromHashTable(HashTable *table, const char *key) {
+    int hash = murmur3_32(key, strlen(key), HASH_SEED) % HASH_TABLE_SIZE;
+    ListNode *curr = table->list[hash];
+
+    while (curr) {
+        if (strcmp(curr->data.sParam[7], key) == 0) {
+			removeFromList(&(table->list[hash]), curr);
+			return 1;
+        }
+        curr = nextNode(table->list[hash], curr);
+    }
+
+    return 0;
+}
+
 uint32_t murmur3_32(const uint8_t* key, size_t len, uint32_t seed) {
 	uint32_t h = seed;
 	if (len > 3) {

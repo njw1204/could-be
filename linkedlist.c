@@ -24,6 +24,16 @@ void appendToList(List *L, YYNode tdata) {
     }
 }
 
+void removeFromList(List *L, ListNode *node) {
+    node->next->prev = node->prev;
+    node->prev->next = node->next;
+    if (*L == node) {
+        if (*L == node->next) *L = NULL;
+        else *L = node->next;
+    }
+    free(node);
+}
+
 ListNode *nextNode(List L, ListNode *currentNode) {
     if (!currentNode || currentNode->next == L) {
         return NULL;
