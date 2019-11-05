@@ -5,7 +5,9 @@ typedef enum YYNodeType {
     T_FUNCTION = -70770770,
     T_PROCEDURE,
     T_VAR,
-    T_ARRAY
+    T_ARRAY,
+    T_CONST,
+    T_OTHER
 } YYNodeType;
 
 typedef struct YYNode {
