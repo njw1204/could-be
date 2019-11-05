@@ -12,6 +12,7 @@ typedef struct ListNode {
 typedef ListNode *List;
 
 List createList();
+void concatList(List *dest, List addList);
 void appendToList(List *L, YYNode tdata);
 void removeFromList(List *L, ListNode *node);
 ListNode *nextNode(List L, ListNode *currentNode);

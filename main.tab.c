@@ -81,11 +81,13 @@ extern int yylineno;
 int errorCount = 0;
 FILE *yyin;
 HashTable symbolTable;
-char buf[2048] = {0};
+HashTable tempVarTable;
+int debugVal = 0;
+char buf[4096] = {0};
 
 
 /* Line 189 of yacc.c  */
-#line 89 "main.tab.c"
+#line 91 "main.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -108,14 +110,15 @@ char buf[2048] = {0};
 /* "%code requires" blocks.  */
 
 /* Line 209 of yacc.c  */
-#line 62 "main.y"
+#line 72 "main.y"
 
 	#include "yynode.h"
+	#include "linkedlist.h"
 
 
 
 /* Line 209 of yacc.c  */
-#line 119 "main.tab.c"
+#line 122 "main.tab.c"
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -159,17 +162,18 @@ typedef union YYSTYPE
 {
 
 /* Line 214 of yacc.c  */
-#line 66 "main.y"
+#line 77 "main.y"
 
 	char name[1024];
 	int intData;
 	float floatData;
 	struct YYNode nodeData;
+	List nodeList;
 
 
 
 /* Line 214 of yacc.c  */
-#line 173 "main.tab.c"
+#line 177 "main.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -181,7 +185,7 @@ typedef union YYSTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 185 "main.tab.c"
+#line 189 "main.tab.c"
 
 #ifdef short
 # undef short
@@ -497,14 +501,14 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    76,    76,    81,    82,    85,    86,    91,    92,    95,
-      96,   101,   102,   105,   117,   124,   133,   134,   137,   138,
-     143,   146,   147,   150,   151,   152,   153,   154,   155,   156,
-     157,   158,   163,   164,   165,   166,   169,   170,   175,   176,
-     181,   182,   187,   188,   193,   194,   199,   222,   223,   226,
-     227,   232,   233,   234,   237,   240,   241,   244,   245,   248,
-     249,   250,   251,   258,   259,   264,   265,   268,   269,   270,
-     271,   272,   273,   276,   277,   280,   281
+       0,    88,    88,    94,   109,   114,   121,   132,   135,   144,
+     144,   149,   150,   153,   165,   173,   183,   184,   187,   188,
+     196,   199,   200,   206,   210,   211,   212,   213,   214,   215,
+     216,   217,   224,   225,   226,   227,   230,   231,   236,   237,
+     242,   243,   248,   249,   254,   259,   268,   291,   292,   295,
+     296,   301,   302,   303,   306,   309,   310,   313,   314,   317,
+     318,   319,   320,   327,   328,   333,   334,   337,   338,   339,
+     340,   341,   342,   345,   346,   349,   350
 };
 #endif
 
@@ -1505,70 +1509,100 @@ yyreduce:
         case 2:
 
 /* Line 1455 of yacc.c  */
-#line 76 "main.y"
-    {;}
+#line 88 "main.y"
+    {
+	;}
     break;
 
   case 3:
 
 /* Line 1455 of yacc.c  */
-#line 81 "main.y"
-    {;}
+#line 94 "main.y"
+    {
+		(yyval.nodeList) = (yyvsp[(4) - (4)].nodeList);
+		ListNode *curr = (yyvsp[(2) - (4)].nodeList);
+		while (curr) {
+			if ((yyvsp[(1) - (4)].intData) == T_VAR) {
+				curr->data.type = T_VAR;
+			}
+			else {
+				curr->data.type = T_ARRAY;
+				curr->data.iParam[1] = (yyvsp[(1) - (4)].intData);
+			}
+			appendToList(&((yyval.nodeList)), curr->data);
+			curr = nextNode((yyvsp[(2) - (4)].nodeList), curr);
+		}
+	;}
+    break;
+
+  case 4:
+
+/* Line 1455 of yacc.c  */
+#line 109 "main.y"
+    {
+		(yyval.nodeList) = createList();
+	;}
     break;
 
   case 5:
 
 /* Line 1455 of yacc.c  */
-#line 85 "main.y"
-    { (yyval.intData) = 1; ;}
+#line 114 "main.y"
+    {
+		(yyval.nodeList) = createList();
+		YYNode node = {0};
+		node.iParam[0] = yylineno;
+		strcpy(node.sParam[0], (yyvsp[(1) - (1)].name));
+		appendToList(&((yyval.nodeList)), node);
+	;}
     break;
 
   case 6:
 
 /* Line 1455 of yacc.c  */
-#line 86 "main.y"
-    { (yyval.intData) = (yyvsp[(3) - (3)].intData) + 1; ;}
+#line 121 "main.y"
+    {
+		(yyval.nodeList) = (yyvsp[(3) - (3)].nodeList);
+		YYNode node = {0};
+		node.iParam[0] = yylineno;
+		strcpy(node.sParam[0], (yyvsp[(1) - (3)].name));
+		appendToList(&((yyval.nodeList)), node);
+	;}
     break;
 
   case 7:
 
 /* Line 1455 of yacc.c  */
-#line 91 "main.y"
-    {;}
+#line 132 "main.y"
+    {
+		(yyval.intData) = T_VAR;
+	;}
     break;
 
   case 8:
 
 /* Line 1455 of yacc.c  */
-#line 92 "main.y"
-    {;}
-    break;
-
-  case 9:
-
-/* Line 1455 of yacc.c  */
-#line 95 "main.y"
-    {;}
-    break;
-
-  case 10:
-
-/* Line 1455 of yacc.c  */
-#line 96 "main.y"
-    {;}
+#line 135 "main.y"
+    {
+		(yyval.intData) = (yyvsp[(3) - (4)].intData);
+		if ((yyvsp[(3) - (4)].intData) < 1) {
+			sprintf(buf, "array must have positive size");
+			yyerror(buf);
+		}
+	;}
     break;
 
   case 11:
 
 /* Line 1455 of yacc.c  */
-#line 101 "main.y"
+#line 149 "main.y"
     {;}
     break;
 
   case 13:
 
 /* Line 1455 of yacc.c  */
-#line 105 "main.y"
+#line 153 "main.y"
     {
 		YYNode node = (yyvsp[(1) - (3)].nodeData);
 		if (!findFromHashTable(&symbolTable, node.sParam[0])) {
@@ -1584,11 +1618,12 @@ yyreduce:
   case 14:
 
 /* Line 1455 of yacc.c  */
-#line 117 "main.y"
+#line 165 "main.y"
     {
 		YYNode node;
 		node.type = T_FUNCTION;
-		node.iParam[0] = (yyvsp[(3) - (6)].intData); // 인자 개수
+		node.iParam[0] = yylineno;
+		node.iParam[1] = lengthOfList((yyvsp[(3) - (6)].nodeList)); // 인자 개수
 		strcpy(node.sParam[0], (yyvsp[(2) - (6)].name)); // 함수 이름
 		(yyval.nodeData) = node;
 	;}
@@ -1597,11 +1632,12 @@ yyreduce:
   case 15:
 
 /* Line 1455 of yacc.c  */
-#line 124 "main.y"
+#line 173 "main.y"
     {
 		YYNode node;
 		node.type = T_PROCEDURE;
-		node.iParam[0] = (yyvsp[(3) - (4)].intData); // 인자 개수
+		node.iParam[0] = yylineno;
+		node.iParam[1] = lengthOfList((yyvsp[(3) - (4)].nodeList)); // 인자 개수
 		strcpy(node.sParam[0], (yyvsp[(2) - (4)].name)); // 프로시저 이름
 		(yyval.nodeData) = node;
 	;}
@@ -1610,203 +1646,236 @@ yyreduce:
   case 16:
 
 /* Line 1455 of yacc.c  */
-#line 133 "main.y"
-    { (yyval.intData) = (yyvsp[(2) - (3)].intData); ;}
+#line 183 "main.y"
+    { (yyval.nodeList) = (yyvsp[(2) - (3)].nodeList); ;}
     break;
 
   case 17:
 
 /* Line 1455 of yacc.c  */
-#line 134 "main.y"
-    { (yyval.intData) = 0; ;}
+#line 184 "main.y"
+    { (yyval.nodeList) = createList(); ;}
     break;
 
   case 18:
 
 /* Line 1455 of yacc.c  */
-#line 137 "main.y"
-    { (yyval.intData) = (yyvsp[(1) - (3)].intData); ;}
+#line 187 "main.y"
+    { (yyval.nodeList) = (yyvsp[(1) - (3)].nodeList); ;}
     break;
 
   case 19:
 
 /* Line 1455 of yacc.c  */
-#line 138 "main.y"
-    { (yyval.intData) = (yyvsp[(1) - (5)].intData) + (yyvsp[(5) - (5)].intData); ;}
+#line 188 "main.y"
+    {
+		(yyval.nodeList) = (yyvsp[(1) - (5)].nodeList);
+		concatList(&((yyval.nodeList)), (yyvsp[(5) - (5)].nodeList));
+	;}
     break;
 
   case 20:
 
 /* Line 1455 of yacc.c  */
-#line 143 "main.y"
+#line 196 "main.y"
     {;}
     break;
 
   case 21:
 
 /* Line 1455 of yacc.c  */
-#line 146 "main.y"
-    {;}
+#line 199 "main.y"
+    { (yyval.nodeList) = (yyvsp[(1) - (1)].nodeList); ;}
     break;
 
   case 22:
 
 /* Line 1455 of yacc.c  */
-#line 147 "main.y"
-    {;}
+#line 200 "main.y"
+    {
+		(yyval.nodeList) = (yyvsp[(1) - (3)].nodeList);
+		concatList(&((yyval.nodeList)), (yyvsp[(3) - (3)].nodeList));
+	;}
     break;
 
   case 23:
 
 /* Line 1455 of yacc.c  */
-#line 150 "main.y"
-    {;}
+#line 206 "main.y"
+    {
+		(yyval.nodeList) = createList();
+		appendToList(&((yyval.nodeList)), (yyvsp[(1) - (3)].nodeData));
+	;}
     break;
 
   case 24:
 
 /* Line 1455 of yacc.c  */
-#line 151 "main.y"
+#line 210 "main.y"
     {;}
     break;
 
   case 25:
 
 /* Line 1455 of yacc.c  */
-#line 152 "main.y"
+#line 211 "main.y"
     {;}
     break;
 
   case 26:
 
 /* Line 1455 of yacc.c  */
-#line 153 "main.y"
+#line 212 "main.y"
     {;}
     break;
 
   case 27:
 
 /* Line 1455 of yacc.c  */
-#line 154 "main.y"
+#line 213 "main.y"
     {;}
     break;
 
   case 28:
 
 /* Line 1455 of yacc.c  */
-#line 155 "main.y"
+#line 214 "main.y"
     {;}
     break;
 
   case 29:
 
 /* Line 1455 of yacc.c  */
-#line 156 "main.y"
+#line 215 "main.y"
     {;}
+    break;
+
+  case 30:
+
+/* Line 1455 of yacc.c  */
+#line 216 "main.y"
+    {;}
+    break;
+
+  case 31:
+
+/* Line 1455 of yacc.c  */
+#line 217 "main.y"
+    {
+		(yyval.nodeList) = createList();
+	;}
     break;
 
   case 32:
 
 /* Line 1455 of yacc.c  */
-#line 163 "main.y"
+#line 224 "main.y"
     {;}
     break;
 
   case 33:
 
 /* Line 1455 of yacc.c  */
-#line 164 "main.y"
+#line 225 "main.y"
     {;}
     break;
 
   case 34:
 
 /* Line 1455 of yacc.c  */
-#line 165 "main.y"
+#line 226 "main.y"
     {;}
     break;
 
   case 35:
 
 /* Line 1455 of yacc.c  */
-#line 166 "main.y"
+#line 227 "main.y"
     {;}
     break;
 
   case 36:
 
 /* Line 1455 of yacc.c  */
-#line 169 "main.y"
+#line 230 "main.y"
     {;}
     break;
 
   case 37:
 
 /* Line 1455 of yacc.c  */
-#line 170 "main.y"
+#line 231 "main.y"
     {;}
     break;
 
   case 38:
 
 /* Line 1455 of yacc.c  */
-#line 175 "main.y"
+#line 236 "main.y"
     {;}
     break;
 
   case 39:
 
 /* Line 1455 of yacc.c  */
-#line 176 "main.y"
+#line 237 "main.y"
     {;}
     break;
 
   case 40:
 
 /* Line 1455 of yacc.c  */
-#line 181 "main.y"
+#line 242 "main.y"
     {;}
     break;
 
   case 41:
 
 /* Line 1455 of yacc.c  */
-#line 182 "main.y"
+#line 243 "main.y"
     {;}
     break;
 
   case 42:
 
 /* Line 1455 of yacc.c  */
-#line 187 "main.y"
+#line 248 "main.y"
     {;}
     break;
 
   case 43:
 
 /* Line 1455 of yacc.c  */
-#line 188 "main.y"
+#line 249 "main.y"
     {;}
     break;
 
   case 44:
 
 /* Line 1455 of yacc.c  */
-#line 193 "main.y"
-    {;}
+#line 254 "main.y"
+    {
+		(yyval.nodeData).type = T_VAR;
+		(yyval.nodeData).iParam[0] = yylineno;
+		strcpy((yyval.nodeData).sParam[0], (yyvsp[(1) - (1)].name));
+	;}
     break;
 
   case 45:
 
 /* Line 1455 of yacc.c  */
-#line 194 "main.y"
-    {;}
+#line 259 "main.y"
+    {
+		(yyval.nodeData).type = T_ARRAY;
+		(yyval.nodeData).iParam[0] = yylineno;
+		strcpy((yyval.nodeData).sParam[0], (yyvsp[(1) - (4)].name));
+	;}
     break;
 
   case 46:
 
 /* Line 1455 of yacc.c  */
-#line 199 "main.y"
+#line 268 "main.y"
     {
 		YYNode *nodePtr = findFromHashTable(&symbolTable, (yyvsp[(1) - (4)].name));
 		if (nodePtr == NULL) {
@@ -1819,7 +1888,7 @@ yyreduce:
 			yyerror(buf);
 			(yyval.nodeData).type = T_NONE;
 		}
-		else if (nodePtr->iParam[0] != (yyvsp[(3) - (4)].intData)) {
+		else if (nodePtr->iParam[1] != (yyvsp[(3) - (4)].intData)) {
 			sprintf(buf, "\"%s\" expect %d parameter, but %d given", (yyvsp[(1) - (4)].name), nodePtr->iParam[0], (yyvsp[(3) - (4)].intData));
 			yyerror(buf);
 			(yyval.nodeData) = *nodePtr;
@@ -1833,112 +1902,112 @@ yyreduce:
   case 47:
 
 /* Line 1455 of yacc.c  */
-#line 222 "main.y"
+#line 291 "main.y"
     { (yyval.intData) = (yyvsp[(1) - (1)].intData); ;}
     break;
 
   case 48:
 
 /* Line 1455 of yacc.c  */
-#line 223 "main.y"
+#line 292 "main.y"
     { (yyval.intData) = 0; ;}
     break;
 
   case 49:
 
 /* Line 1455 of yacc.c  */
-#line 226 "main.y"
+#line 295 "main.y"
     { (yyval.intData) = 1; ;}
     break;
 
   case 50:
 
 /* Line 1455 of yacc.c  */
-#line 227 "main.y"
+#line 296 "main.y"
     { (yyval.intData) = (yyvsp[(3) - (3)].intData) + 1; ;}
     break;
 
   case 51:
 
 /* Line 1455 of yacc.c  */
-#line 232 "main.y"
+#line 301 "main.y"
     {;}
     break;
 
   case 52:
 
 /* Line 1455 of yacc.c  */
-#line 233 "main.y"
+#line 302 "main.y"
     {;}
     break;
 
   case 53:
 
 /* Line 1455 of yacc.c  */
-#line 234 "main.y"
+#line 303 "main.y"
     {;}
     break;
 
   case 54:
 
 /* Line 1455 of yacc.c  */
-#line 237 "main.y"
+#line 306 "main.y"
     {;}
     break;
 
   case 55:
 
 /* Line 1455 of yacc.c  */
-#line 240 "main.y"
+#line 309 "main.y"
     {;}
     break;
 
   case 56:
 
 /* Line 1455 of yacc.c  */
-#line 241 "main.y"
+#line 310 "main.y"
     {;}
     break;
 
   case 57:
 
 /* Line 1455 of yacc.c  */
-#line 244 "main.y"
+#line 313 "main.y"
     {;}
     break;
 
   case 58:
 
 /* Line 1455 of yacc.c  */
-#line 245 "main.y"
+#line 314 "main.y"
     {;}
     break;
 
   case 59:
 
 /* Line 1455 of yacc.c  */
-#line 248 "main.y"
+#line 317 "main.y"
     {;}
     break;
 
   case 60:
 
 /* Line 1455 of yacc.c  */
-#line 249 "main.y"
+#line 318 "main.y"
     {;}
     break;
 
   case 61:
 
 /* Line 1455 of yacc.c  */
-#line 250 "main.y"
+#line 319 "main.y"
     {;}
     break;
 
   case 62:
 
 /* Line 1455 of yacc.c  */
-#line 251 "main.y"
+#line 320 "main.y"
     {
 		YYNode node = (yyvsp[(1) - (1)].nodeData);
 		if (node.type != T_NONE && node.type != T_FUNCTION) {
@@ -1951,105 +2020,105 @@ yyreduce:
   case 63:
 
 /* Line 1455 of yacc.c  */
-#line 258 "main.y"
+#line 327 "main.y"
     {;}
     break;
 
   case 64:
 
 /* Line 1455 of yacc.c  */
-#line 259 "main.y"
+#line 328 "main.y"
     {;}
     break;
 
   case 65:
 
 /* Line 1455 of yacc.c  */
-#line 264 "main.y"
+#line 333 "main.y"
     {;}
     break;
 
   case 66:
 
 /* Line 1455 of yacc.c  */
-#line 265 "main.y"
+#line 334 "main.y"
     {;}
     break;
 
   case 67:
 
 /* Line 1455 of yacc.c  */
-#line 268 "main.y"
+#line 337 "main.y"
     {;}
     break;
 
   case 68:
 
 /* Line 1455 of yacc.c  */
-#line 269 "main.y"
+#line 338 "main.y"
     {;}
     break;
 
   case 69:
 
 /* Line 1455 of yacc.c  */
-#line 270 "main.y"
+#line 339 "main.y"
     {;}
     break;
 
   case 70:
 
 /* Line 1455 of yacc.c  */
-#line 271 "main.y"
+#line 340 "main.y"
     {;}
     break;
 
   case 71:
 
 /* Line 1455 of yacc.c  */
-#line 272 "main.y"
+#line 341 "main.y"
     {;}
     break;
 
   case 72:
 
 /* Line 1455 of yacc.c  */
-#line 273 "main.y"
+#line 342 "main.y"
     {;}
     break;
 
   case 73:
 
 /* Line 1455 of yacc.c  */
-#line 276 "main.y"
+#line 345 "main.y"
     {;}
     break;
 
   case 74:
 
 /* Line 1455 of yacc.c  */
-#line 277 "main.y"
+#line 346 "main.y"
     {;}
     break;
 
   case 75:
 
 /* Line 1455 of yacc.c  */
-#line 280 "main.y"
+#line 349 "main.y"
     {;}
     break;
 
   case 76:
 
 /* Line 1455 of yacc.c  */
-#line 281 "main.y"
+#line 350 "main.y"
     {;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 2053 "main.tab.c"
+#line 2122 "main.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2261,7 +2330,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 284 "main.y"
+#line 353 "main.y"
 
 
 int yyerror(char *s) {

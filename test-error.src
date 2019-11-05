@@ -1,6 +1,7 @@
 mainprog mucheol;
 int[100] x,z123;
 float y;
+int[0] mumu;
 
 function muchul (sex:int;fuck:float;fuckfuckfuck:int) : float;
 	int[100] x, z123;

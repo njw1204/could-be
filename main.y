@@ -10,7 +10,9 @@ extern int yylineno;
 int errorCount = 0;
 FILE *yyin;
 HashTable symbolTable;
-char buf[2048] = {0};
+HashTable tempVarTable;
+int debugVal = 0;
+char buf[4096] = {0};
 %}
 
 %error-verbose
@@ -51,16 +53,25 @@ char buf[2048] = {0};
 %type <intData> INTEGER
 %type <floatData> FLOAT
 
-%type <intData> identifier_list // 식별자 개수
+%type <nodeList> declarations // 선언한 변수 목록
+%type <nodeList> identifier_list // 식별자 목록
+%type <intData> type // 변수 자료형 (T_VAR or 배열 크기)
 %type <nodeData> subprogram_head // 함수 정보
-%type <intData> parameter_list // 함수 호출 파라미터 개수
-%type <intData> arguments // 함수 호출 파라미터 개수
+%type <nodeList> parameter_list // 함수 호출 파라미터 목록
+%type <nodeList> arguments // 함수 호출 파라미터 목록
 %type <intData> actual_parameter_expression // 식 개수
 %type <intData> expression_list // 식 개수
 %type <nodeData> procedure_statement // 함수 정보
 
+%type <nodeData> compound_statement;
+%type <nodeList> statement_list;
+%type <nodeList> statement;
+
+%type <nodeData> variable;
+
 %code requires {
 	#include "yynode.h"
+	#include "linkedlist.h"
 }
 
 %union {
@@ -68,32 +79,69 @@ char buf[2048] = {0};
 	int intData;
 	float floatData;
 	struct YYNode nodeData;
+	List nodeList;
 }
 
 %%
 
 program:
-	MAINPROG ID ';' declarations subprogram_declarations compound_statement {}
+	MAINPROG ID ';' declarations subprogram_declarations compound_statement {
+	}
 ;
 
 
 declarations:
-	type identifier_list ';' declarations {}
-	|
+	type identifier_list ';' declarations {
+		$$ = $4;
+		ListNode *curr = $2;
+		while (curr) {
+			if ($1 == T_VAR) {
+				curr->data.type = T_VAR;
+			}
+			else {
+				curr->data.type = T_ARRAY;
+				curr->data.iParam[1] = $1;
+			}
+			appendToList(&($$), curr->data);
+			curr = nextNode($2, curr);
+		}
+	}
+	| {
+		$$ = createList();
+	}
 ;
 identifier_list:
-	ID { $$ = 1; }
-	| ID ',' identifier_list { $$ = $3 + 1; }
+	ID {
+		$$ = createList();
+		YYNode node = {0};
+		node.iParam[0] = yylineno;
+		strcpy(node.sParam[0], $1);
+		appendToList(&($$), node);
+	}
+	| ID ',' identifier_list {
+		$$ = $3;
+		YYNode node = {0};
+		node.iParam[0] = yylineno;
+		strcpy(node.sParam[0], $1);
+		appendToList(&($$), node);
+	}
 ;
 
 
 type:
-	standard_type {}
-	| standard_type '[' INTEGER ']' {}
+	standard_type {
+		$$ = T_VAR;
+	}
+	| standard_type '[' INTEGER ']' {
+		$$ = $3;
+		if ($3 < 1) {
+			sprintf(buf, "array must have positive size");
+			yyerror(buf);
+		}
+	}
 ;
 standard_type:
-	TYPE_INT {}
-	| TYPE_FLOAT {}
+	TYPE_INT | TYPE_FLOAT
 ;
 
 
@@ -117,25 +165,30 @@ subprogram_head:
 	FUNCTION ID arguments ':' standard_type ';' {
 		YYNode node;
 		node.type = T_FUNCTION;
-		node.iParam[0] = $3; // 인자 개수
+		node.iParam[0] = yylineno;
+		node.iParam[1] = lengthOfList($3); // 인자 개수
 		strcpy(node.sParam[0], $2); // 함수 이름
 		$$ = node;
 	}
 	| PROCEDURE ID arguments ';' {
 		YYNode node;
 		node.type = T_PROCEDURE;
-		node.iParam[0] = $3; // 인자 개수
+		node.iParam[0] = yylineno;
+		node.iParam[1] = lengthOfList($3); // 인자 개수
 		strcpy(node.sParam[0], $2); // 프로시저 이름
 		$$ = node;
 	}
 ;
 arguments:
 	'(' parameter_list ')' { $$ = $2; }
-	| { $$ = 0; }
+	| { $$ = createList(); }
 ;
 parameter_list:
 	identifier_list ':' type { $$ = $1; }
-	| identifier_list ':' type ';' parameter_list { $$ = $1 + $5; }
+	| identifier_list ':' type ';' parameter_list {
+		$$ = $1;
+		concatList(&($$), $5);
+	}
 ;
 
 
@@ -143,19 +196,27 @@ compound_statement:
 	BEGIN_BODY statement_list END_BODY {}
 ;
 statement_list:
-	statement {}
-	| statement ';' statement_list {}
+	statement { $$ = $1; }
+	| statement ';' statement_list {
+		$$ = $1;
+		concatList(&($$), $3);
+	}
 ;
 statement:
-	variable '=' expression {}
+	variable '=' expression {
+		$$ = createList();
+		appendToList(&($$), $1);
+	}
 	| print_statement {}
 	| procedure_statement {}
 	| compound_statement {}
 	| if_statement {}
 	| while_statement {}
 	| for_statement {}
-	| RETURN expression
-	| NOP
+	| RETURN expression {}
+	| NOP {
+		$$ = createList();
+	}
 ;
 
 
@@ -190,8 +251,16 @@ print_statement:
 
 
 variable:
-	ID {}
-	| ID '[' expression ']' {}
+	ID {
+		$$.type = T_VAR;
+		$$.iParam[0] = yylineno;
+		strcpy($$.sParam[0], $1);
+	}
+	| ID '[' expression ']' {
+		$$.type = T_ARRAY;
+		$$.iParam[0] = yylineno;
+		strcpy($$.sParam[0], $1);
+	}
 ;
 
 
@@ -208,7 +277,7 @@ procedure_statement:
 			yyerror(buf);
 			$$.type = T_NONE;
 		}
-		else if (nodePtr->iParam[0] != $3) {
+		else if (nodePtr->iParam[1] != $3) {
 			sprintf(buf, "\"%s\" expect %d parameter, but %d given", $1, nodePtr->iParam[0], $3);
 			yyerror(buf);
 			$$ = *nodePtr;
