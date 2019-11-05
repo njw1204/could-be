@@ -7,6 +7,14 @@ List createList() {
     return NULL;
 }
 
+void concatList(List *dest, List addList) {
+    ListNode *curr = addList;
+    while (curr) {
+        appendToList(dest, curr->data);
+        curr = nextNode(addList, curr);
+    }
+}
+
 void appendToList(List *L, YYNode tdata) {
     ListNode *newNode = (ListNode *)malloc(sizeof(ListNode));
     newNode->data = tdata;

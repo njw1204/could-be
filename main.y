@@ -10,7 +10,9 @@ extern int yylineno;
 int errorCount = 0;
 FILE *yyin;
 HashTable symbolTable;
-char buf[2048] = {0};
+HashTable tempVarTable;
+int debugVal = 0;
+char buf[4096] = {0};
 %}
 
 %error-verbose
@@ -51,16 +53,33 @@ char buf[2048] = {0};
 %type <intData> INTEGER
 %type <floatData> FLOAT
 
-%type <intData> identifier_list // 식별자 개수
+%type <nodeList> declarations // 선언한 변수 목록
+%type <nodeList> identifier_list // 식별자 목록
+%type <intData> type // 변수 자료형 (T_VAR or 배열 크기)
+%type <nodeList> subprogram_declarations;
+%type <nodeData> subprogram_declaration;
 %type <nodeData> subprogram_head // 함수 정보
-%type <intData> parameter_list // 함수 호출 파라미터 개수
-%type <intData> arguments // 함수 호출 파라미터 개수
-%type <intData> actual_parameter_expression // 식 개수
-%type <intData> expression_list // 식 개수
+%type <nodeList> parameter_list // 함수 호출 파라미터 목록
+%type <nodeList> arguments // 함수 호출 파라미터 목록
 %type <nodeData> procedure_statement // 함수 정보
+
+%type <nodeData> compound_statement;
+%type <nodeList> statement_list;
+%type <nodeData> statement;
+
+%type <nodeData> variable;
+
+%type <nodeList> actual_parameter_expression
+%type <nodeList> expression_list
+%type <nodeData> expression;
+%type <nodeData> in_expression;
+%type <nodeList> simple_expression;
+%type <nodeList> term;
+%type <nodeData> factor;
 
 %code requires {
 	#include "yynode.h"
+	#include "linkedlist.h"
 }
 
 %union {
@@ -68,47 +87,95 @@ char buf[2048] = {0};
 	int intData;
 	float floatData;
 	struct YYNode nodeData;
+	List nodeList;
 }
 
 %%
 
 program:
-	MAINPROG ID ';' declarations subprogram_declarations compound_statement {}
+	MAINPROG ID ';' declarations subprogram_declarations compound_statement {
+	}
 ;
 
 
 declarations:
-	type identifier_list ';' declarations {}
-	|
+	type identifier_list ';' declarations {
+		$$ = $4;
+		ListNode *curr = $2;
+		while (curr) {
+			if ($1 == T_VAR) {
+				curr->data.type = T_VAR;
+			}
+			else {
+				curr->data.type = T_ARRAY;
+				curr->data.iParam[1] = $1;
+			}
+			appendToList(&($$), curr->data);
+			curr = nextNode($2, curr);
+		}
+	}
+	| {
+		$$ = createList();
+	}
 ;
 identifier_list:
-	ID { $$ = 1; }
-	| ID ',' identifier_list { $$ = $3 + 1; }
+	ID {
+		$$ = createList();
+		YYNode node = {0};
+		node.type = T_ID;
+		node.iParam[0] = yylineno;
+		strcpy(node.sParam[0], $1);
+		appendToList(&($$), node);
+	}
+	| ID ',' identifier_list {
+		$$ = $3;
+		YYNode node = {0};
+		node.type = T_ID;
+		node.iParam[0] = yylineno;
+		strcpy(node.sParam[0], $1);
+		appendToList(&($$), node);
+	}
 ;
 
 
 type:
-	standard_type {}
-	| standard_type '[' INTEGER ']' {}
+	standard_type {
+		$$ = T_VAR;
+	}
+	| standard_type '[' INTEGER ']' {
+		$$ = $3;
+		if ($3 < 1) {
+			sprintf(buf, "array must have positive size");
+			yyerror(buf);
+		}
+	}
 ;
 standard_type:
-	TYPE_INT {}
-	| TYPE_FLOAT {}
+	TYPE_INT | TYPE_FLOAT
 ;
 
 
 subprogram_declarations:
-	subprogram_declaration subprogram_declarations {}
-	|
+	subprogram_declaration subprogram_declarations {
+		$$ = createList();
+		appendToList(&($$), $1);
+		concatList(&($$), $2);
+	}
+	| { $$ = createList(); }
 ;
 subprogram_declaration:
 	subprogram_head declarations compound_statement {
-		YYNode node = $1;
-		if (!findFromHashTable(&symbolTable, node.sParam[0])) {
-			insertToHashTable(&symbolTable, node.sParam[0], node);
+		YYNode ret = {0};
+		$$ = ret;
+		$$.type = T_SUBPROGRAM_DECL;
+
+		if (!findFromHashTable(&symbolTable, $1.sParam[0])) {
+			insertToHashTable(&symbolTable, $1.sParam[0], $1);
+			$$.rParam[0] = $2; // 지역변수 목록
+			$$.rParam[1] = $1.rParam[0]; // 매개변수 목록
 		}
 		else {
-			sprintf(buf, "identifier \"%s\" is declared duplicately", node.sParam[0]);
+			sprintf(buf, "identifier \"%s\" is declared duplicately", $1.sParam[0]);
 			yyerror(buf);
 		}
 	}
@@ -117,45 +184,104 @@ subprogram_head:
 	FUNCTION ID arguments ':' standard_type ';' {
 		YYNode node;
 		node.type = T_FUNCTION;
-		node.iParam[0] = $3; // 인자 개수
+		node.iParam[0] = yylineno;
+		node.iParam[1] = lengthOfList($3); // 인자 개수
+		node.rParam[0] = $3; // 매개변수 목록
 		strcpy(node.sParam[0], $2); // 함수 이름
 		$$ = node;
 	}
 	| PROCEDURE ID arguments ';' {
 		YYNode node;
 		node.type = T_PROCEDURE;
-		node.iParam[0] = $3; // 인자 개수
+		node.iParam[0] = yylineno;
+		node.iParam[1] = lengthOfList($3); // 인자 개수
+		node.rParam[0] = $3; // 매개변수 목록
 		strcpy(node.sParam[0], $2); // 프로시저 이름
 		$$ = node;
 	}
 ;
 arguments:
 	'(' parameter_list ')' { $$ = $2; }
-	| { $$ = 0; }
+	| { $$ = createList(); }
 ;
 parameter_list:
-	identifier_list ':' type { $$ = $1; }
-	| identifier_list ':' type ';' parameter_list { $$ = $1 + $5; }
+	identifier_list ':' type {
+		ListNode *curr = $1;
+		while (curr) {
+			if ($3 == T_VAR) {
+				curr->data.type = T_VAR;
+			}
+			else {
+				curr->data.type = T_ARRAY;
+				curr->data.iParam[1] = $3;
+			}
+			curr = nextNode($1, curr);
+		}
+		$$ = $1;
+	}
+	| identifier_list ':' type ';' parameter_list {
+		ListNode *curr = $1;
+		while (curr) {
+			if ($3 == T_VAR) {
+				curr->data.type = T_VAR;
+			}
+			else {
+				curr->data.type = T_ARRAY;
+				curr->data.iParam[1] = $3;
+			}
+			curr = nextNode($1, curr);
+		}
+		$$ = $1;
+		concatList(&($$), $5);
+	}
 ;
 
 
 compound_statement:
-	BEGIN_BODY statement_list END_BODY {}
+	BEGIN_BODY statement_list END_BODY {
+		$$.type = T_COMPOUND;
+		$$.iParam[0] = yylineno;
+		$$.rParam[0] = $2;
+	}
 ;
 statement_list:
-	statement {}
-	| statement ';' statement_list {}
+	statement {
+		$$ = createList();
+		appendToList(&($$), $1);
+	}
+	| statement ';' statement_list {
+		$$ = createList();
+		appendToList(&($$), $1);
+		concatList(&($$), $3);
+	}
 ;
 statement:
-	variable '=' expression {}
+	variable '=' expression {
+		$$.type = T_ASSIGN;
+		$$.iParam[0] = yylineno;
+
+		List tempList = createList();
+		appendToList(&tempList, $1);
+		$$.rParam[0] = tempList;
+		tempList = createList();
+		appendToList(&tempList, $3);
+		$$.rParam[1] = tempList;
+	}
 	| print_statement {}
 	| procedure_statement {}
-	| compound_statement {}
+	| compound_statement { $$ = $1; }
 	| if_statement {}
 	| while_statement {}
 	| for_statement {}
-	| RETURN expression
-	| NOP
+	| RETURN expression {
+		$$.type = T_RETURN;
+		$$.iParam[0] = yylineno;
+
+		List tempList = createList();
+		appendToList(&tempList, $2);
+		$$.rParam[0] = tempList;
+	}
+	| NOP { $$.type = T_NONE; }
 ;
 
 
@@ -190,14 +316,24 @@ print_statement:
 
 
 variable:
-	ID {}
-	| ID '[' expression ']' {}
+	ID {
+		$$.type = T_VAR;
+		$$.iParam[0] = yylineno;
+		strcpy($$.sParam[0], $1);
+	}
+	| ID '[' expression ']' {
+		$$.type = T_ARRAY;
+		$$.iParam[0] = yylineno;
+		strcpy($$.sParam[0], $1);
+	}
 ;
 
 
 procedure_statement:
 	ID '(' actual_parameter_expression ')' {
 		YYNode *nodePtr = findFromHashTable(&symbolTable, $1);
+		int paraLen = lengthOfList($3);
+
 		if (nodePtr == NULL) {
 			sprintf(buf, "undeclared identifier \"%s\"", $1);
 			yyerror(buf);
@@ -208,8 +344,8 @@ procedure_statement:
 			yyerror(buf);
 			$$.type = T_NONE;
 		}
-		else if (nodePtr->iParam[0] != $3) {
-			sprintf(buf, "\"%s\" expect %d parameter, but %d given", $1, nodePtr->iParam[0], $3);
+		else if (nodePtr->iParam[1] != paraLen) {
+			sprintf(buf, "\"%s\" expect %d parameter, but %d given", $1, nodePtr->iParam[1], paraLen);
 			yyerror(buf);
 			$$ = *nodePtr;
 		}
@@ -220,43 +356,136 @@ procedure_statement:
 ;
 actual_parameter_expression:
 	expression_list { $$ = $1; }
-	| { $$ = 0; }
+	| { $$ = createList(); }
 ;
 expression_list:
-	expression { $$ = 1; }
-	| expression ',' expression_list { $$ = $3 + 1; }
+	expression {
+		$$ = createList();
+		appendToList(&($$), $1);
+	}
+	| expression ',' expression_list {
+		$$ = createList();
+		appendToList(&($$), $1);
+		concatList(&($$), $3);
+	}
 ;
 
 
 expression:
-	simple_expression {}
-	| in_expression {}
-	| simple_expression relop simple_expression {}
+	simple_expression {
+		$$.type = T_SIMPLE_EXPR;
+		$$.iParam[0] = yylineno;
+		$$.rParam[0] = $1;
+	}
+	| in_expression { $$ = $1; }
+	| simple_expression relop simple_expression {
+		$$.type = T_RELOP_EXPR;
+		$$.iParam[0] = yylineno;
+		$$.rParam[0] = $1;
+		$$.rParam[1] = $3;
+	}
 ;
 in_expression:
-	simple_expression IN simple_expression {}
+	simple_expression IN simple_expression {
+		int llistLen = lengthOfList($1), rlistLen = lengthOfList($3);
+		if (rlistLen > 1) {
+			sprintf(buf, "expect l-value on the right side of \"in\", but r-value given");
+			yyerror(buf);
+		}
+		else {
+			ListNode rNode = *($3);
+			if (rNode.data.type != T_VAR) {
+				sprintf(buf, "expect l-value on the right side of \"in\", but r-value given");
+				yyerror(buf);
+			}
+		}
+
+		$$.type = T_IN_EXPR;
+		$$.iParam[0] = yylineno;
+
+		if (llistLen > 1) {
+			$$.iParam[1] = 2; // left r-value
+		}
+		else {
+			ListNode lNode = *($1);
+			if (lNode.data.type == T_VAR || lNode.data.type == T_ARRAY) {
+				$$.iParam[1] = 1; // left l-value
+			}
+			else {
+				$$.iParam[1] = 2; // left r-value
+			}
+		}
+
+		$$.rParam[0] = $1; // left list
+		$$.rParam[1] = $3; // right list
+	}
 ;
 simple_expression:
-	term {}
-	| term addop simple_expression {}
+	term { $$ = $1; }
+	| term addop simple_expression {
+		$$ = $1;
+		concatList(&($$), $3);
+	}
 ;
 term:
-	factor {}
-	| factor multop term {}
+	factor {
+		$$ = createList();
+		appendToList(&($$), $1);
+	}
+	| factor multop term {
+		$$ = createList();
+		appendToList(&($$), $1);
+		concatList(&($$), $3);
+	}
 ;
 factor:
-	INTEGER {}
-	| FLOAT {}
-	| variable {}
+	INTEGER {
+		$$.type = T_CONST;
+		$$.iParam[0] = yylineno;
+		$$.iParam[1] = $1;
+	}
+	| FLOAT {
+		$$.type = T_CONST;
+		$$.iParam[0] = yylineno;
+		$$.iParam[1] = $1;
+	}
+	| variable {
+		$$ = $1;
+	}
 	| procedure_statement {
 		YYNode node = $1;
 		if (node.type != T_NONE && node.type != T_FUNCTION) {
 			sprintf(buf, "\"%s\" is not function so it doesn't have return value", node.sParam[0]);
 			yyerror(buf);
 		}
+		$$.type = T_OTHER;
+		$$.iParam[0] = yylineno;
 	}
-	| '!' factor {}
-	| sign factor {}
+	| '!' factor {
+		$$.iParam[0] = yylineno;
+		if ($2.type == T_CONST) {
+			$$.type = T_CONST;
+			if ($2.iParam[1]) {
+				$$.iParam[1] = 0;
+			}
+			else {
+				$$.iParam[1] = 1;
+			}
+		}
+		else {
+			$$.type = T_OTHER;
+		}
+	}
+	| sign factor {
+		$$.iParam[0] = yylineno;
+		if ($2.type == T_CONST) {
+			$$.type = T_CONST;
+			$$.iParam[1] = -$2.iParam[1];
+		}
+		else {
+			$$.type = T_OTHER;
+		}
+	}
 ;
 
 

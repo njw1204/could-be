@@ -1,6 +1,7 @@
 mainprog mucheol;
 int[100] x,z123;
 float y;
+int[0] mumu;
 
 function muchul (sex:int;fuck:float;fuckfuckfuck:int) : float;
 	int[100] x, z123;
@@ -37,7 +38,7 @@ begin
 			begin
 				nimisaaweljfnwalej();
 				couldbe(1,2);
-				while 1!=2:
+				for 1 in xy[2]:
 					begin
 						fuksdlajfkwlaejf(-1123123.23231241240000);
 						muchul(-1123123.23231241240000, 2, 3.4, 5)

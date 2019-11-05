@@ -35,14 +35,15 @@
 /* "%code requires" blocks.  */
 
 /* Line 1676 of yacc.c  */
-#line 62 "main.y"
+#line 80 "main.y"
 
 	#include "yynode.h"
+	#include "linkedlist.h"
 
 
 
 /* Line 1676 of yacc.c  */
-#line 46 "main.tab.h"
+#line 47 "main.tab.h"
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -86,17 +87,18 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 66 "main.y"
+#line 85 "main.y"
 
 	char name[1024];
 	int intData;
 	float floatData;
 	struct YYNode nodeData;
+	List nodeList;
 
 
 
 /* Line 1676 of yacc.c  */
-#line 100 "main.tab.h"
+#line 102 "main.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
