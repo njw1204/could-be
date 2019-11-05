@@ -63,9 +63,9 @@ char buf[4096] = {0};
 %type <nodeList> arguments // 함수 호출 파라미터 목록
 %type <nodeData> procedure_statement // 함수 정보
 
-%type <nodeList> compound_statement;
+%type <nodeData> compound_statement;
 %type <nodeList> statement_list;
-%type <nodeList> statement;
+%type <nodeData> statement;
 
 %type <nodeData> variable;
 
@@ -122,6 +122,7 @@ identifier_list:
 	ID {
 		$$ = createList();
 		YYNode node = {0};
+		node.type = T_ID;
 		node.iParam[0] = yylineno;
 		strcpy(node.sParam[0], $1);
 		appendToList(&($$), node);
@@ -129,6 +130,7 @@ identifier_list:
 	| ID ',' identifier_list {
 		$$ = $3;
 		YYNode node = {0};
+		node.type = T_ID;
 		node.iParam[0] = yylineno;
 		strcpy(node.sParam[0], $1);
 		appendToList(&($$), node);
@@ -165,6 +167,7 @@ subprogram_declaration:
 	subprogram_head declarations compound_statement {
 		YYNode ret = {0};
 		$$ = ret;
+		$$.type = T_SUBPROGRAM_DECL;
 
 		if (!findFromHashTable(&symbolTable, $1.sParam[0])) {
 			insertToHashTable(&symbolTable, $1.sParam[0], $1);
@@ -235,28 +238,50 @@ parameter_list:
 
 
 compound_statement:
-	BEGIN_BODY statement_list END_BODY { $$ = $2; }
+	BEGIN_BODY statement_list END_BODY {
+		$$.type = T_COMPOUND;
+		$$.iParam[0] = yylineno;
+		$$.rParam[0] = $2;
+	}
 ;
 statement_list:
-	statement { $$ = $1; }
+	statement {
+		$$ = createList();
+		appendToList(&($$), $1);
+	}
 	| statement ';' statement_list {
-		$$ = $1;
+		$$ = createList();
+		appendToList(&($$), $1);
 		concatList(&($$), $3);
 	}
 ;
 statement:
 	variable '=' expression {
-		$$ = createList();
-		appendToList(&($$), $1);
+		$$.type = T_ASSIGN;
+		$$.iParam[0] = yylineno;
+
+		List tempList = createList();
+		appendToList(&tempList, $1);
+		$$.rParam[0] = tempList;
+		tempList = createList();
+		appendToList(&tempList, $3);
+		$$.rParam[1] = tempList;
 	}
-	| print_statement { $$ = createList(); }
-	| procedure_statement { $$ = createList(); }
-	| compound_statement { $$ = createList(); }
-	| if_statement { $$ = createList(); }
-	| while_statement { $$ = createList(); }
-	| for_statement { $$ = createList(); }
-	| RETURN expression { $$ = createList(); }
-	| NOP { $$ = createList(); }
+	| print_statement {}
+	| procedure_statement {}
+	| compound_statement { $$ = $1; }
+	| if_statement {}
+	| while_statement {}
+	| for_statement {}
+	| RETURN expression {
+		$$.type = T_RETURN;
+		$$.iParam[0] = yylineno;
+
+		List tempList = createList();
+		appendToList(&tempList, $2);
+		$$.rParam[0] = tempList;
+	}
+	| NOP { $$.type = T_NONE; }
 ;
 
 
@@ -308,7 +333,7 @@ procedure_statement:
 	ID '(' actual_parameter_expression ')' {
 		YYNode *nodePtr = findFromHashTable(&symbolTable, $1);
 		int paraLen = lengthOfList($3);
-		
+
 		if (nodePtr == NULL) {
 			sprintf(buf, "undeclared identifier \"%s\"", $1);
 			yyerror(buf);
@@ -334,7 +359,7 @@ actual_parameter_expression:
 	| { $$ = createList(); }
 ;
 expression_list:
-	expression { 
+	expression {
 		$$ = createList();
 		appendToList(&($$), $1);
 	}
@@ -348,18 +373,16 @@ expression_list:
 
 expression:
 	simple_expression {
-		$$.type = T_OTHER;
+		$$.type = T_SIMPLE_EXPR;
 		$$.iParam[0] = yylineno;
 		$$.rParam[0] = $1;
 	}
 	| in_expression { $$ = $1; }
 	| simple_expression relop simple_expression {
-		$$.type = T_OTHER;
+		$$.type = T_RELOP_EXPR;
 		$$.iParam[0] = yylineno;
 		$$.rParam[0] = $1;
-		List tempPtr = $$.rParam[0];
-		concatList(&tempPtr, $3);
-		$$.rParam[0] = tempPtr;
+		$$.rParam[1] = $3;
 	}
 ;
 in_expression:
@@ -377,26 +400,24 @@ in_expression:
 			}
 		}
 
-		$$.type = T_OTHER;
+		$$.type = T_IN_EXPR;
 		$$.iParam[0] = yylineno;
 
 		if (llistLen > 1) {
-			$$.iParam[1] = 2; // r-value
+			$$.iParam[1] = 2; // left r-value
 		}
 		else {
 			ListNode lNode = *($1);
 			if (lNode.data.type == T_VAR || lNode.data.type == T_ARRAY) {
-				$$.iParam[1] = 1; // l-value
+				$$.iParam[1] = 1; // left l-value
 			}
 			else {
-				$$.iParam[1] = 2; // r-value
+				$$.iParam[1] = 2; // left r-value
 			}
 		}
 
 		$$.rParam[0] = $1; // left list
-		List tempPtr = $$.rParam[0];
-		concatList(&tempPtr, $3); // concat right list
-		$$.rParam[0] = tempPtr;
+		$$.rParam[1] = $3; // right list
 	}
 ;
 simple_expression:
