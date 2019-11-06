@@ -266,11 +266,10 @@ static void yy_flex_free YY_PROTO(( void * ));
 typedef unsigned char YY_CHAR;
 FILE *yyin = (FILE *) 0, *yyout = (FILE *) 0;
 typedef int yy_state_type;
-#define YY_FLEX_LEX_COMPAT
 extern int yylineno;
 int yylineno = 1;
-extern char yytext[];
-
+extern char *yytext;
+#define yytext_ptr yytext
 
 static yy_state_type yy_get_previous_state YY_PROTO(( void ));
 static yy_state_type yy_try_NUL_trans YY_PROTO(( yy_state_type current_state ));
@@ -285,12 +284,6 @@ static void yy_fatal_error YY_PROTO(( yyconst char msg[] ));
 	yyleng = (int) (yy_cp - yy_bp); \
 	yy_hold_char = *yy_cp; \
 	*yy_cp = '\0'; \
-	if ( yyleng + yy_more_offset >= YYLMAX ) \
-		YY_FATAL_ERROR( "token too large, exceeds YYLMAX" ); \
-	yy_flex_strncpy( &yytext[yy_more_offset], yytext_ptr, yyleng + 1 ); \
-	yyleng += yy_more_offset; \
-	yy_prev_more_offset = yy_more_offset; \
-	yy_more_offset = 0; \
 	yy_c_buf_p = yy_cp;
 
 #define YY_NUM_RULES 29
@@ -446,29 +439,17 @@ yy_cp = yy_full_match; /* restore poss. backed-over text */ \
 ++yy_lp; \
 goto find_rule; \
 }
-static int yy_more_offset = 0;
-static int yy_prev_more_offset = 0;
-#define yymore() (yy_more_offset = yy_flex_strlen( yytext ))
-#define YY_NEED_STRLEN
+#define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
-#define YY_RESTORE_YY_MORE_OFFSET \
-	{ \
-	yy_more_offset = yy_prev_more_offset; \
-	yyleng -= yy_more_offset; \
-	}
-#ifndef YYLMAX
-#define YYLMAX 8192
-#endif
-
-char yytext[YYLMAX];
-char *yytext_ptr;
+#define YY_RESTORE_YY_MORE_OFFSET
+char *yytext;
 #line 1 "main.l"
 #define INITIAL 0
 #line 2 "main.l"
 #include <stdio.h>
 #include <string.h>
 #include "main.tab.h"
-#line 472 "lex.yy.c"
+#line 453 "lex.yy.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -622,7 +603,7 @@ YY_DECL
 #line 15 "main.l"
 
 
-#line 626 "lex.yy.c"
+#line 607 "lex.yy.c"
 
 	if ( yy_init )
 		{
@@ -858,7 +839,7 @@ YY_RULE_SETUP
 #line 50 "main.l"
 ECHO;
 	YY_BREAK
-#line 862 "lex.yy.c"
+#line 843 "lex.yy.c"
 			case YY_STATE_EOF(INITIAL):
 				yyterminate();
 

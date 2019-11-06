@@ -77,6 +77,9 @@ const YYNode ZERO_NODE = {0};
 
 %type <nodeData> if_statement;
 %type <nodeList> elif_statement;
+%type <nodeData> while_statement;
+%type <nodeData> for_statement;
+%type <nodeData> print_statement;
 
 %type <nodeData> variable;
 
@@ -275,12 +278,12 @@ statement:
 		*((YYNode*)$$.rParam[0]) = $1; // variable (nodeData)
 		*((YYNode*)$$.rParam[1]) = $3; // expression (nodeData)
 	}
-	| print_statement {}
-	| procedure_statement {}
+	| print_statement {$$ = $1;}
+	| procedure_statement {$$ = $1;}
 	| compound_statement { $$ = $1; }
-	| if_statement {}
-	| while_statement {}
-	| for_statement {}
+	| if_statement {$$ = $1;}
+	| while_statement {$$ = $1;}
+	| for_statement {$$ = $1;}
 	| RETURN expression {
 		$$.type = T_RETURN;
 		$$.iParam[0] = yylineno;
@@ -377,20 +380,69 @@ elif_statement:
 
 
 while_statement:
-	WHILE expression ':' statement {}
-	| WHILE expression ':' statement ELSE ':' statement {}
+	WHILE expression ':' statement {
+		$$ = ZERO_NODE;
+		$$.type = T_WHILE_STMT;
+		$$.iParam[0] = yylineno;
+		$$.rParam[0] = malloc(sizeof(YYNode));
+		$$.rParam[1] = malloc(sizeof(YYNode));
+
+		*((YYNode*)$$.rParam[0]) = $2; // expression (nodeData)
+		*((YYNode*)$$.rParam[1]) = $4; // statement (nodeData)
+
+	}
+	| WHILE expression ':' statement ELSE ':' statement {
+		$$ = ZERO_NODE;
+		$$.type = T_WHILE_ELSE_STMT;
+		$$.iParam[0] = yylineno;
+		$$.rParam[0] = malloc(sizeof(YYNode));
+		$$.rParam[1] = malloc(sizeof(YYNode));
+		$$.rParam[2] = malloc(sizeof(YYNode));
+
+		*((YYNode*)$$.rParam[0]) = $2; // expression (nodeData)
+		*((YYNode*)$$.rParam[1]) = $4; // statement (nodeData)
+		*((YYNode*)$$.rParam[2]) = $7; // else statement (nodeData)
+	}
 ;
 
 
 for_statement:
-	FOR in_expression ':' statement {}
-	| FOR in_expression ':' statement ELSE ':' statement {}
+	FOR in_expression ':' statement {
+		$$ = ZERO_NODE;
+		$$.type = T_FOR_STMT;
+		$$.iParam[0] = yylineno;
+		$$.rParam[0] = malloc(sizeof(YYNode));
+		$$.rParam[1] = malloc(sizeof(YYNode));
+
+		*((YYNode*)$$.rParam[0]) = $2; // in_expression (nodeData)
+		*((YYNode*)$$.rParam[1]) = $4; // statement (nodeData)
+	}
+	| FOR in_expression ':' statement ELSE ':' statement {
+		$$ = ZERO_NODE;
+		$$.type = T_FOR_ELSE_STMT;
+		$$.iParam[0] = yylineno;
+		$$.rParam[0] = malloc(sizeof(YYNode));
+		$$.rParam[1] = malloc(sizeof(YYNode));
+		$$.rParam[2] = malloc(sizeof(YYNode));
+
+		*((YYNode*)$$.rParam[0]) = $2; // expression (nodeData)
+		*((YYNode*)$$.rParam[1]) = $4; // statement (nodeData)
+		*((YYNode*)$$.rParam[2]) = $7; // else statement (nodeData)
+	}
 ;
 
 
 print_statement:
-	PRINT {}
-	| PRINT '(' expression ')' {}
+	PRINT {
+		$$ = ZERO_NODE;
+		$$.type = T_PRINT_STMT;
+		$$.iParam[0] = yylineno;
+	}
+	| PRINT '(' expression ')' {
+		$$ = $3;
+		$$.type = T_PRINT_STMT;
+		$$.iParam[0] = yylineno;
+	}
 ;
 
 
