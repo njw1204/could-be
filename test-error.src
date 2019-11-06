@@ -43,6 +43,18 @@ begin
 						fuksdlajfkwlaejf(-1123123.23231241240000);
 						muchul(-1123123.23231241240000, 2, 3.4, 5)
 					end
+			end;
+
+		if a > 1: print(123);
+
+		if 1 == 2:
+			begin
+				nop;
+				nop
+			end
+		else:
+			begin
+				nop
 			end
 	end;
 	print(bongbong == muchul)
