@@ -75,6 +75,9 @@ const YYNode ZERO_NODE = {0};
 %type <nodeList> statement_list;
 %type <nodeData> statement;
 
+%type <nodeData> if_statement;
+%type <nodeList> elif_statement;
+
 %type <nodeData> variable;
 
 %type <nodeList> actual_parameter_expression
@@ -293,14 +296,83 @@ statement:
 
 
 if_statement:
-	IF expression ':' statement {}
-	| IF expression ':' statement ELSE ':' statement {}
-	| IF expression ':' statement elif_statement {}
-	| IF expression ':' statement elif_statement ELSE ':' statement {}
+	IF expression ':' statement {
+		$$ = ZERO_NODE;
+		$$.type = T_IF;
+		$$.iParam[0] = yylineno;
+		$$.rParam[0] = malloc(sizeof(YYNode));
+		$$.rParam[1] = malloc(sizeof(YYNode));
+
+		*((YYNode*)$$.rParam[0]) = $2; // expression (nodeData)
+		*((YYNode*)$$.rParam[1]) = $4; // statement (nodeData)
+	}
+	| IF expression ':' statement ELSE ':' statement {
+		$$ = ZERO_NODE;
+		$$.type = T_IF_ELSE;
+		$$.iParam[0] = yylineno;
+		$$.rParam[0] = malloc(sizeof(YYNode));
+		$$.rParam[1] = malloc(sizeof(YYNode));
+		$$.rParam[2] = malloc(sizeof(YYNode));
+
+		*((YYNode*)$$.rParam[0]) = $2; // expression (nodeData)
+		*((YYNode*)$$.rParam[1]) = $4; // statement (nodeData)
+		*((YYNode*)$$.rParam[2]) = $7; // else statement (nodeData)
+	}
+	| IF expression ':' statement elif_statement {
+		$$ = ZERO_NODE;
+		$$.type = T_IF_ELIF;
+		$$.iParam[0] = yylineno;
+		$$.rParam[0] = malloc(sizeof(YYNode));
+		$$.rParam[1] = malloc(sizeof(YYNode));
+
+		*((YYNode*)$$.rParam[0]) = $2; // expression (nodeData)
+		*((YYNode*)$$.rParam[1]) = $4; // statement (nodeData)
+		$$.rParam[2] = $5; // elif statement list (nodeList)
+	}
+	| IF expression ':' statement elif_statement ELSE ':' statement {
+		$$ = ZERO_NODE;
+		$$.type = T_IF_ELIF_ELSE;
+		$$.iParam[0] = yylineno;
+		$$.rParam[0] = malloc(sizeof(YYNode));
+		$$.rParam[1] = malloc(sizeof(YYNode));
+		$$.rParam[3] = malloc(sizeof(YYNode));
+
+		*((YYNode*)$$.rParam[0]) = $2; // expression (nodeData)
+		*((YYNode*)$$.rParam[1]) = $4; // statement (nodeData)
+		$$.rParam[2] = $5; // elif statement list (nodeList)
+		*((YYNode*)$$.rParam[3]) = $8; // else statement (nodeData)
+	}
 ;
 elif_statement:
-	ELIF expression ':' statement elif_statement {}
-	| ELIF expression ':' statement {}
+	ELIF expression ':' statement elif_statement {
+		$$ = createList();
+
+		YYNode node = {0};
+		node.type = T_ELIF;
+		node.iParam[0] = yylineno;
+		node.rParam[0] = malloc(sizeof(YYNode));
+		node.rParam[1] = malloc(sizeof(YYNode));
+
+		*((YYNode*)node.rParam[0]) = $2;
+		*((YYNode*)node.rParam[1]) = $4;
+
+		appendToList(&($$), node);
+		concatList(&($$), $5);
+	}
+	| ELIF expression ':' statement {
+		$$ = createList();
+
+		YYNode node = {0};
+		node.type = T_ELIF;
+		node.iParam[0] = yylineno;
+		node.rParam[0] = malloc(sizeof(YYNode));
+		node.rParam[1] = malloc(sizeof(YYNode));
+
+		*((YYNode*)node.rParam[0]) = $2;
+		*((YYNode*)node.rParam[1]) = $4;
+
+		appendToList(&($$), node);
+	}
 ;
 
 
