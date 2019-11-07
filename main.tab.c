@@ -2776,9 +2776,23 @@ YYNode *findVariable(const char *name) {
 
 int checkUndeclaredVar(YYNode *_node) {
 	if (!findVariable(_node->sParam[0])) {
-		// 선언되지 않은 변수 - 오류 처리
-		sprintf(buf, "undeclared variable \"%s\"", _node->sParam[0]);
-		_yyerror(buf, _node->iParam[0]);
+		YYNode *temp = NULL;
+		if (!(temp = findFromHashTable(&symbolTable, _node->sParam[0]))) {
+			// 선언되지 않은 변수 - 오류 처리
+			sprintf(buf, "undeclared variable \"%s\"", _node->sParam[0]);
+			_yyerror(buf, _node->iParam[0]);
+		}
+		else {
+			// 해당 식별자가 함수나 프로시저인 경우의 오류 (변수가 와야함) - 오류 처리
+			if (temp->type == T_FUNCTION) {
+				sprintf(buf, "\"%s\" is a function, not a variable", _node->sParam[0]);
+				_yyerror(buf, _node->iParam[0]);
+			}
+			else {
+				sprintf(buf, "\"%s\" is a procedure, not a variable", _node->sParam[0]);
+				_yyerror(buf, _node->iParam[0]);
+			}
+		}
 		return 0;
 	}
 	return 1;
@@ -2812,7 +2826,7 @@ int checkStatement(YYNode *_node, int allowCompound) {
 		if (declLeft) {
 			if (left.type == T_VAR_USING && declLeft->type == T_ARRAY) {
 				// 배열 전체에 직접 대입 - 오류 처리
-				sprintf(buf, "can't assign directly/entirely to the array \"%s\"", left.sParam[0]);
+				sprintf(buf, "can't assign directly/entirely to the array \"%s\". please use an index", left.sParam[0]);
 				_yyerror(buf, left.iParam[0]);
 			}
 			else if (left.type == T_ARRAY_USING && declLeft->type == T_VAR) {
@@ -3006,7 +3020,7 @@ int checkSimpleExpression(YYNode *_node, int canArrayInExpr) {
 			if (!canArrayInExpr && declVar->type == T_ARRAY) {
 				// 배열 전체를 인덱스 참조 없이 단일 변수처럼 사용한 오류 - 오류 처리
 				ok = 0;
-				sprintf(buf, "can't use the array \"%s\" directly/entirely here", data->sParam[0]);
+				sprintf(buf, "can't use the array \"%s\" directly/entirely here. please use an index", data->sParam[0]);
 				_yyerror(buf, data->iParam[0]);
 			}
 			break;
@@ -3032,7 +3046,7 @@ int checkSimpleExpression(YYNode *_node, int canArrayInExpr) {
 				break;
 			}
 
-			YYNode *declFunc = findVariable(data->sParam[0]);
+			YYNode *declFunc = findFromHashTable(&symbolTable, data->sParam[0]);
 			if (declFunc->type != T_FUNCTION) {
 				// function이 아님. 리턴값이 없어 expression에서 사용 불가능 - 오류 처리
 				ok = 0;

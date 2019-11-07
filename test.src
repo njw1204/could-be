@@ -2,15 +2,25 @@ mainprog mucheol;
 int[100] x,z123,efg01230,hi;
 float y,a,b,c,d,fuckfuckfuck,muchul2,bongbong;
 
-function muchul (sex:int;fuck:float;fuckfuckfuck:int) : int;
-	int[100] x, z123;
-	begin
-		x=3.12
-	end
 procedure couldbe (sex:int;fuck:float);
 	int[100] x, z123;
 	begin
 		a=.3
+	end
+function muchul (sex:int;fuck:float;fuckfuckfuck:int) : int;
+	int[100] x, z123;
+	begin
+		x[0]=3.12;
+		if fuckfuckfuck <= 1:
+			begin
+				couldbe(123123,1);
+				fuckfuckfuck = 1;
+				return 2
+			end
+		elif fuckfuckfuck == 2:
+			begin
+				couldbe(-1,+1)
+			end
 	end
 
 begin
