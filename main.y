@@ -435,13 +435,16 @@ for_statement:
 print_statement:
 	PRINT {
 		$$ = ZERO_NODE;
-		$$.type = T_PRINT_STMT;
+		$$.type = T_NONE;
 		$$.iParam[0] = yylineno;
 	}
 	| PRINT '(' expression ')' {
 		$$ = $3;
 		$$.type = T_PRINT_STMT;
 		$$.iParam[0] = yylineno;
+		$$.rParam[0] = malloc(sizeof(YYNode));
+
+		*((YYNode*)$$.rParam[0]) = $3; // expression (nodeData)
 	}
 ;
 
