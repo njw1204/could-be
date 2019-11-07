@@ -4,6 +4,7 @@
 #include "main.tab.h"
 %}
 
+%option	noyywrap
 %option	yylineno
 
 letter			[a-zA-Z]

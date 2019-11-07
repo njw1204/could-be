@@ -263,14 +263,16 @@ static void yy_flex_free YY_PROTO(( void * ));
 
 
 #define YY_USES_REJECT
+
+#define yywrap() 1
+#define YY_SKIP_YYWRAP
 typedef unsigned char YY_CHAR;
 FILE *yyin = (FILE *) 0, *yyout = (FILE *) 0;
 typedef int yy_state_type;
-#define YY_FLEX_LEX_COMPAT
 extern int yylineno;
 int yylineno = 1;
-extern char yytext[];
-
+extern char *yytext;
+#define yytext_ptr yytext
 
 static yy_state_type yy_get_previous_state YY_PROTO(( void ));
 static yy_state_type yy_try_NUL_trans YY_PROTO(( yy_state_type current_state ));
@@ -285,12 +287,6 @@ static void yy_fatal_error YY_PROTO(( yyconst char msg[] ));
 	yyleng = (int) (yy_cp - yy_bp); \
 	yy_hold_char = *yy_cp; \
 	*yy_cp = '\0'; \
-	if ( yyleng + yy_more_offset >= YYLMAX ) \
-		YY_FATAL_ERROR( "token too large, exceeds YYLMAX" ); \
-	yy_flex_strncpy( &yytext[yy_more_offset], yytext_ptr, yyleng + 1 ); \
-	yyleng += yy_more_offset; \
-	yy_prev_more_offset = yy_more_offset; \
-	yy_more_offset = 0; \
 	yy_c_buf_p = yy_cp;
 
 #define YY_NUM_RULES 29
@@ -447,29 +443,17 @@ yy_cp = yy_full_match; /* restore poss. backed-over text */ \
 ++yy_lp; \
 goto find_rule; \
 }
-static int yy_more_offset = 0;
-static int yy_prev_more_offset = 0;
-#define yymore() (yy_more_offset = yy_flex_strlen( yytext ))
-#define YY_NEED_STRLEN
+#define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
-#define YY_RESTORE_YY_MORE_OFFSET \
-	{ \
-	yy_more_offset = yy_prev_more_offset; \
-	yyleng -= yy_more_offset; \
-	}
-#ifndef YYLMAX
-#define YYLMAX 8192
-#endif
-
-char yytext[YYLMAX];
-char *yytext_ptr;
+#define YY_RESTORE_YY_MORE_OFFSET
+char *yytext;
 #line 1 "main.l"
 #define INITIAL 0
 #line 2 "main.l"
 #include <stdio.h>
 #include <string.h>
 #include "main.tab.h"
-#line 473 "lex.yy.c"
+#line 457 "lex.yy.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -620,10 +604,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 15 "main.l"
+#line 16 "main.l"
 
 
-#line 627 "lex.yy.c"
+#line 611 "lex.yy.c"
 
 	if ( yy_init )
 		{
@@ -716,150 +700,150 @@ do_action:	/* This label is used only to access EOF actions. */
 	{ /* beginning of action switch */
 case 1:
 YY_RULE_SETUP
-#line 17 "main.l"
+#line 18 "main.l"
 {return (TYPE_INT);}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 18 "main.l"
+#line 19 "main.l"
 {return (TYPE_FLOAT);}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 20 "main.l"
+#line 21 "main.l"
 {return (MAINPROG);}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 21 "main.l"
+#line 22 "main.l"
 {return (FUNCTION);}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 22 "main.l"
+#line 23 "main.l"
 {return (PROCEDURE);}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 23 "main.l"
+#line 24 "main.l"
 {return (BEGIN_BODY);}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 24 "main.l"
+#line 25 "main.l"
 {return (END_BODY);}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 25 "main.l"
+#line 26 "main.l"
 {return (IF);}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 26 "main.l"
+#line 27 "main.l"
 {return (THEN);}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 27 "main.l"
+#line 28 "main.l"
 {return (ELIF);}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 28 "main.l"
+#line 29 "main.l"
 {return (ELSE);}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 29 "main.l"
+#line 30 "main.l"
 {return (NOP);}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 30 "main.l"
+#line 31 "main.l"
 {return (WHILE);}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 31 "main.l"
+#line 32 "main.l"
 {return (FOR);}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 32 "main.l"
+#line 33 "main.l"
 {return (RETURN);}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 33 "main.l"
+#line 34 "main.l"
 {return (PRINT);}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 34 "main.l"
+#line 35 "main.l"
 {return (IN);}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 36 "main.l"
+#line 37 "main.l"
 {sscanf(yytext, "%s", yylval.name); return (ID);}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 37 "main.l"
+#line 38 "main.l"
 {yylval.floatData = atof(yytext); return (FLOAT);}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 38 "main.l"
+#line 39 "main.l"
 {yylval.intData = atoi(yytext); return (INTEGER);}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 40 "main.l"
+#line 41 "main.l"
 {return (OP_EQ);}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 41 "main.l"
+#line 42 "main.l"
 {return (OP_NE);}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 42 "main.l"
+#line 43 "main.l"
 {return (OP_LE);}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 43 "main.l"
+#line 44 "main.l"
 {return (OP_GE);}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 44 "main.l"
+#line 45 "main.l"
 {return (OP_LT);}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 45 "main.l"
+#line 46 "main.l"
 {return (OP_GT);}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 47 "main.l"
+#line 48 "main.l"
 {}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 48 "main.l"
+#line 49 "main.l"
 {return *yytext;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 50 "main.l"
+#line 51 "main.l"
 ECHO;
 	YY_BREAK
-#line 863 "lex.yy.c"
+#line 847 "lex.yy.c"
 			case YY_STATE_EOF(INITIAL):
 				yyterminate();
 
@@ -1743,5 +1727,5 @@ int main()
 	return 0;
 	}
 #endif
-#line 50 "main.l"
+#line 51 "main.l"
 
