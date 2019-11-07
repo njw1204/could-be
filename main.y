@@ -703,7 +703,9 @@ int _yyerror(char *s, int yylineno) {
 }
 
 void printAllError() {
+	sortList(errorList);
 	ListNode *curr = errorList;
+
 	while (curr) {
 		if (curr->data.type == T_ERROR) {
 			printf("Error: %s at line %d\n", curr->data.sParam[0], curr->data.iParam[0]);
