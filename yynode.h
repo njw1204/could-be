@@ -1,9 +1,12 @@
 #pragma once
 
+#define BUF_SIZE 4096
+
 typedef enum YYNodeType {
     T_NONE,
-    T_ID,
-    T_FUNCTION = -70770770,
+    T_ERROR,
+    T_ID = -70770770,
+    T_FUNCTION,
     T_PROCEDURE,
     T_SUBPROGRAM_DECL,
     T_FUNCTION_CALL,
@@ -30,14 +33,13 @@ typedef enum YYNodeType {
     T_RELOP_EXPR,
     T_VAR_USING,
     T_ARRAY_USING,
-    T_DYNAMIC_FACTOR,
-    T_OTHER
+    T_DYNAMIC_FACTOR
 } YYNodeType;
 
 typedef struct YYNode {
     enum YYNodeType type;
     int iParam[8];
     float fParam[8];
-    char sParam[8][1024];
+    char *sParam[8];
     void *rParam[8];
 } YYNode;

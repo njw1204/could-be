@@ -1,5 +1,6 @@
 %{
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "hashtable.h"
 int yylex();
@@ -10,14 +11,13 @@ extern int yylineno;
 
 #define L_VALUE 1
 #define R_VALUE 2
-
-int errorCount = 0;
-FILE *yyin;
-HashTable symbolTable;
-HashTable tempVarTable;
-int debugVal = 0;
-char buf[4096] = {0};
 const YYNode ZERO_NODE = {0};
+
+FILE *yyin;
+int errorCount = 0;
+List errorList = NULL;
+HashTable symbolTable;
+char buf[BUF_SIZE] = {0};
 %}
 
 %error-verbose
@@ -108,6 +108,18 @@ const YYNode ZERO_NODE = {0};
 
 program:
 	MAINPROG ID ';' declarations subprogram_declarations compound_statement {
+		// 전역변수 선언
+		List globalVarList = $4;
+		for (ListNode *curr = globalVarList; curr; curr = nextNode(globalVarList, curr)) {
+			if (!findFromHashTable(&symbolTable, curr->data.sParam[0])) {
+				insertToHashTable(&symbolTable, curr->data.sParam[0], curr->data);
+			}
+			else {
+				// 중복 변수 선언 - 오류 처리
+				sprintf(buf, "identifier \"%s\" is declared duplicately", curr->data.sParam[0]);
+				_yyerror(buf, curr->data.iParam[0]);
+			}
+		}
 	}
 ;
 
@@ -136,6 +148,7 @@ identifier_list:
 		YYNode node = {0};
 		node.type = T_ID;
 		node.iParam[0] = yylineno;
+		node.sParam[0] = malloc(BUF_SIZE);
 		strcpy(node.sParam[0], $1); // 식별자 이름
 		appendToList(&($$), node);
 	}
@@ -144,6 +157,7 @@ identifier_list:
 		YYNode node = {0};
 		node.type = T_ID;
 		node.iParam[0] = yylineno;
+		node.sParam[0] = malloc(BUF_SIZE);
 		strcpy(node.sParam[0], $1); // 식별자 이름
 		appendToList(&($$), node);
 		concatList(&($$), $3);
@@ -204,6 +218,7 @@ subprogram_head:
 		node.iParam[0] = yylineno;
 		node.iParam[1] = lengthOfList($3); // 매개변수 개수
 		node.rParam[0] = $3; // 매개변수 목록 (nodeList)
+		node.sParam[0] = malloc(BUF_SIZE);
 		strcpy(node.sParam[0], $2); // 함수 이름
 		$$ = node;
 	}
@@ -213,6 +228,7 @@ subprogram_head:
 		node.iParam[0] = yylineno;
 		node.iParam[1] = lengthOfList($3); // 매개변수 개수
 		node.rParam[0] = $3; // 매개변수 목록 (nodeList)
+		node.sParam[0] = malloc(BUF_SIZE);
 		strcpy(node.sParam[0], $2); // 프로시저 이름
 		$$ = node;
 	}
@@ -278,12 +294,12 @@ statement:
 		*((YYNode*)$$.rParam[0]) = $1; // variable (nodeData)
 		*((YYNode*)$$.rParam[1]) = $3; // expression (nodeData)
 	}
-	| print_statement {$$ = $1;}
-	| procedure_statement {$$ = $1;}
+	| print_statement { $$ = $1; }
+	| procedure_statement { $$ = $1; }
 	| compound_statement { $$ = $1; }
-	| if_statement {$$ = $1;}
-	| while_statement {$$ = $1;}
-	| for_statement {$$ = $1;}
+	| if_statement { $$ = $1; }
+	| while_statement { $$ = $1; }
+	| for_statement { $$ = $1; }
 	| RETURN expression {
 		$$.type = T_RETURN;
 		$$.iParam[0] = yylineno;
@@ -453,11 +469,13 @@ variable:
 	ID {
 		$$.type = T_VAR_USING;
 		$$.iParam[0] = yylineno;
+		$$.sParam[0] = malloc(BUF_SIZE);
 		strcpy($$.sParam[0], $1); // 식별자 이름
 	}
 	| ID '[' expression ']' {
 		$$.type = T_ARRAY_USING;
 		$$.iParam[0] = yylineno;
+		$$.sParam[0] = malloc(BUF_SIZE);
 		strcpy($$.sParam[0], $1); // 식별자 이름
 	}
 ;
@@ -670,13 +688,31 @@ multop:
 %%
 
 int yyerror(char *s) {
-	_yyerror(s, yylineno);
+	return _yyerror(s, yylineno);
 }
 
 int _yyerror(char *s, int yylineno) {
-	printf("Error: %s at line %d\n", s, yylineno);
+	YYNode node = {0};
+	node.type = T_ERROR;
+	node.iParam[0] = yylineno;
+	node.sParam[0] = malloc(BUF_SIZE);
+	strcpy(node.sParam[0], s);
+	appendToList(&(errorList), node);
 	errorCount++;
 	return 0;
+}
+
+void printAllError() {
+	ListNode *curr = errorList;
+	while (curr) {
+		if (curr->data.type == T_ERROR) {
+			printf("Error: %s at line %d\n", curr->data.sParam[0], curr->data.iParam[0]);
+		}
+
+		ListNode *temp = curr;
+		curr = nextNode(errorList, curr);
+		removeFromList(&(errorList), temp);
+	}
 }
 
 void prepareParse() {
@@ -688,7 +724,9 @@ int main(int argc, char *argv[]) {
 		yyin = fopen(argv[1], "r");
 		if (yyin) {
 			prepareParse();
-			if (yyparse() == 0) {
+			int parsed = yyparse();
+			printAllError();
+			if (parsed == 0) {
 				if (errorCount == 0) {
 					printf("[Compile OK]\n");
 				}
