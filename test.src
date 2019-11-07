@@ -1,5 +1,5 @@
 mainprog mucheol;
-int[100] x,z123,efg01230,hi;
+int[100] x,z123,efg01230,hi,e1;
 float y,a,b,c,d,fuckfuckfuck,muchul2,bongbong;
 
 procedure couldbe (sex:int;fuck:float);
@@ -24,6 +24,7 @@ function muchul (sex:int;fuck:float;fuckfuckfuck:int) : int;
 	end
 
 begin
+	print(e1[e1[3*e1[e1[e1[e1[e1[50]-2]]]+1]]]);
 	for muchul2 in z123:
 	begin
 		fuckfuckfuck = a + b * c - d / efg01230[1];
@@ -48,5 +49,18 @@ begin
 					end
 			end
 	end;
-	print(bongbong == muchul2)
+
+	for x[5] in e1:
+		begin
+			print(e1[e1[e1[e1[e1[e1[e1[50]]]]]]]);
+			d = 3. + 123 - .3 * 3.112 / 94.24230923540909;
+			e1[2] = b
+		end
+	else:
+		begin
+			print(a+x[1]/b)
+		end;
+
+	print(bongbong == muchul2);
+	print(1 in x)
 end

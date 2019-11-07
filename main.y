@@ -657,6 +657,7 @@ in_expression:
 
 		int llistLen = lengthOfList($1.rParam[0]), rlistLen = lengthOfList($3.rParam[0]);
 		if (rlistLen > 1) {
+			// IN 우항은 무조건 r-value - 오류 처리
 			sprintf(buf, "expect l-value on the right side of \"in\", but r-value given");
 			yyerror(buf);
 			$$.iParam[2] = R_VALUE;
@@ -664,6 +665,7 @@ in_expression:
 		else {
 			ListNode rNode = *((ListNode*)$3.rParam[0]);
 			if (rNode.data.type != T_VAR_USING) {
+				// IN 우항은 무조건 r-value - 오류 처리
 				sprintf(buf, "expect l-value on the right side of \"in\", but r-value given");
 				yyerror(buf);
 				$$.iParam[2] = R_VALUE;
@@ -971,7 +973,7 @@ int checkStatement(YYNode *_node, int allowCompound) {
 	case T_COMPOUND:
 		if (!allowCompound) {
 			// BEGIN~END문은 연속 중첩 불가능 (if, for문 등의 아래에 나와야 함) - 오류 처리
-			sprintf(buf, "begin~end statment can't be nested directly here");
+			sprintf(buf, "begin~end statement can't be nested directly here");
 			_yyerror(buf, data.iParam[0]);
 		}
 
