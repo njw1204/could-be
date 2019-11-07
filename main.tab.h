@@ -35,7 +35,7 @@
 /* "%code requires" blocks.  */
 
 /* Line 1676 of yacc.c  */
-#line 94 "main.y"
+#line 104 "main.y"
 
 	#include "yynode.h"
 	#include "linkedlist.h"
@@ -87,7 +87,7 @@ typedef union YYSTYPE
 {
 
 /* Line 1676 of yacc.c  */
-#line 99 "main.y"
+#line 109 "main.y"
 
 	char name[1024];
 	int intData;

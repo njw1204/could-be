@@ -1,6 +1,6 @@
 mainprog mucheol;
-int[100] x,z123;
-float y;
+int[100] x,z123,efg01230,hi;
+float y,a,b,c,d,fuckfuckfuck,muchul2,bongbong;
 
 function muchul (sex:int;fuck:float;fuckfuckfuck:int) : int;
 	int[100] x, z123;
@@ -14,9 +14,9 @@ procedure couldbe (sex:int;fuck:float);
 	end
 
 begin
-	for muchul in bongbong:
+	for muchul2 in z123:
 	begin
-		fuckfuckfuck = a + b * c - d / efg01230;
+		fuckfuckfuck = a + b * c - d / efg01230[1];
 		if fuckfuckfuck <= 1:
 			begin
 				couldbe(123123,1);
@@ -27,16 +27,16 @@ begin
 				couldbe(-1,+1)
 			end
 		elif 2>1:
-			print(hi)
+			print(hi[1])
 		else:
 			begin
 				y = muchul(1, 2, 3);
 				while 1!=2:
 					begin
 						muchul(-1123123.23231241240000, 2, 3);
-						x=1
+						x[90]=1
 					end
 			end
 	end;
-	print(bongbong == muchul)
+	print(bongbong == muchul2)
 end

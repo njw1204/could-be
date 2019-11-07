@@ -9,6 +9,7 @@ typedef enum YYNodeType {
     T_FUNCTION,
     T_PROCEDURE,
     T_SUBPROGRAM_DECL,
+    T_CALL,
     T_FUNCTION_CALL,
     T_PROCEDURE_CALL,
     T_VAR,
