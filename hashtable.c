@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include "yynode.h"
 #include "linkedlist.h"
@@ -12,7 +13,8 @@ HashTable createHashTable() {
 
 void insertToHashTable(HashTable *table, const char *key, YYNode node) {
     int hash = murmur3_32(key, strlen(key), HASH_SEED) % HASH_TABLE_SIZE;
-    strncpy(node.sParam[7], key, sizeof(node.sParam[7]));
+    node.sParam[7] = malloc(BUF_SIZE);
+    strncpy(node.sParam[7], key, BUF_SIZE);
     appendToList(&(table->list[hash]), node);
 }
 

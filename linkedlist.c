@@ -42,6 +42,28 @@ void removeFromList(List *L, ListNode *node) {
     free(node);
 }
 
+void sortList(List L) {
+    if (L == NULL) return;
+
+    int len = lengthOfList(L);
+    for (int i = len - 1; i >= 1; i--) {
+        ListNode* prev = L;
+        for (int j = 0; j < i; j++) {
+            ListNode* next = prev->next;
+
+            if (prev->data.iParam[0] > next->data.iParam[0]) {
+                // swap data
+                ListNode temp = *prev;
+                prev->data = next->data;
+                next->data = temp.data;
+            }
+
+            prev = next;
+            next = next->next;
+        }
+    }
+}
+
 ListNode *nextNode(List L, ListNode *currentNode) {
     if (!currentNode || currentNode->next == L) {
         return NULL;

@@ -15,6 +15,7 @@ List createList();
 void concatList(List *dest, List addList);
 void appendToList(List *L, YYNode tdata);
 void removeFromList(List *L, ListNode *node);
+void sortList(List L);
 ListNode *nextNode(List L, ListNode *currentNode);
 ListNode *prevNode(List L, ListNode *currentNode);
 size_t lengthOfList(List L);

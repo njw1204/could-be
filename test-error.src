@@ -1,61 +1,88 @@
-mainprog mucheol;
-int[100] x,z123;
-float y;
-int[0] mumu;
+mainprog myProgram;
 
-function muchul (sex:int;fuck:float;fuckfuckfuck:int) : float;
-	int[100] x, z123;
+int[100] xxxxx, e1;
+int[0] e2;
+float hi, hi2, pi;
+int x, e1;
+
+function dfs(si: int; sj: int; hihihihihi: float; sj: float): float;
+	int[100] xxxxx, e1;
+	int si, hihihihihi;
+	float HelloWorld;
+	int[100] HelloWorld;
+
 	begin
-		x=3.12
-	end
-procedure couldbe (sex:int;fuck:float);
-	int[100] x, z123;
-	begin
-		a=.3
+		x=.12;
+		MyVariable=couldbe(1,2);
+
+		for 12345 in hi2:
+			begin
+				hi = -x * e1[40] / -xxxxx[1];
+				if hi <= 1:
+					begin
+						nop; nop; nop
+					end
+				elif 2 == hi:
+					begin
+						print(dfs);
+						nop; nop; nop
+					end
+				elif 1 > 2:
+					print(hi[1])
+				else:
+					begin
+						while 1!=2:
+							begin
+								e1[90]=e1[90-1]+1;
+								e1[90-1]=e1[90]-1
+							end
+						else:
+							e1[90]=e1[90-1]+1;
+						print(dfs(1,2))
+					end
+			end;
+
+		print(0)
 	end
 
-function muchul: int;
+procedure couldbe(pa1: int);
+	begin
+		return 12*1-9/222+9
+	end
+
+procedure dfs;
 	begin
 		nop
 	end
 
-begin
-	for muchul in bongbong:
+function hi: int;
 	begin
-		fuckfuckfuck = a + b * c - d / efg01230;
-		if fuckfuckfuck == 1:
-			begin
-				x=couldbe(123123);
-				fuckfuckfuck = 1
-			end
-		elif fuckfuckfuck == 2:
-			begin
-				couldbe()
-			end
-		elif 2>1:
-			print(hi)
-		else:
-			begin
-				nimisaaweljfnwalej();
-				couldbe(1,2);
-				for 1 in xy[2]:
-					begin
-						fuksdlajfkwlaejf(-1123123.23231241240000);
-						muchul(-1123123.23231241240000, 2, 3.4, 5)
-					end
-			end;
+		print(1+11+111);
+		return 12*1-9/222+9
+	end
 
-		if a > 1: print(123);
+begin
+	print(1 in e1);
 
-		if 1 == 2:
-			begin
-				nop;
-				nop
-			end
-		else:
-			begin
-				nop
-			end
+	for xxxxx[5] in e1:
+		begin
+			print(e1[e1[e1[e1[e1[e1[e1[50]]]]]]]);
+			hi = 3. + 123 - .3 * 3.112 / 94.24230923540909
+		end
+	else:
+		begin
+			print(hi+xxxxx[1]/hi2)
+		end;
+
+	begin
+		nop
 	end;
-	print(bongbong == muchul)
+
+	hi = couldbe(100);
+	e1 = hi;
+
+	for hi in e1[0]+93939+14+e1[0]-1349*14:
+		pi = 3.14159265358979323;
+		pi = pi * e1 + xxxxx[0];
+		xxxxx[0] = xxxxx[0] + 1
 end

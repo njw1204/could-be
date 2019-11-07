@@ -4,13 +4,14 @@
 #include "main.tab.h"
 %}
 
+%option	noyywrap
 %option	yylineno
 
 letter			[a-zA-Z]
 digit			[0-9]
 id				{letter}({letter}|{digit})*
 integer			{digit}+
-float			{digit}*\.{digit}+
+float			({digit}*\.{digit}+|{digit}+\.{digit}*)
 
 %%
 

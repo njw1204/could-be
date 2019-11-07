@@ -71,28 +71,38 @@
 #line 1 "main.y"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "hashtable.h"
 int yylex();
 int yyerror(char *s);
 int _yyerror(char *s, int yylineno);
 void prepareParse();
+YYNode *findVariable(const char *name);
+int checkUndeclaredVar(YYNode *_node);
+int checkUndeclaredFunc(YYNode *_node);
+int checkStatement(YYNode *_node, int allowCompound);
+int checkExpression(YYNode *_node);
+int checkSimpleExpression(YYNode *_node, int canArrayInExpr);
 extern int yylineno;
 
 #define L_VALUE 1
 #define R_VALUE 2
+const YYNode ZERO_NODE = {0}; // 0 초기화용 상수 노드
 
-int errorCount = 0;
-FILE *yyin;
-HashTable symbolTable;
-HashTable tempVarTable;
-int debugVal = 0;
-char buf[4096] = {0};
-const YYNode ZERO_NODE = {0};
+FILE *yyin; // 소스 파일을 입력받는 스트림
+int errorCount = 0; // 에러 개수를 세는 변수
+List errorList = NULL; // 에러 내용을 전부 저장하는 링크드 리스트
+HashTable symbolTable; // 함수, 프로시저를 저장하는 해시테이블
+HashTable globalVarTable; // 전역 변수를 저장하는 해시테이블
+HashTable paramSymbolTable; // 매개 변수를 저장하는 해시테이블
+HashTable localSymbolTable; // 지역 변수를 저장하는 해시테이블
+int found_return = 0; // return문을 만나는 순간 1로 설정됨. (함수 내부에 return문 존재하나 체크하는 용도)
+char buf[BUF_SIZE] = {0}; // 에러 출력용으로 사용하는 버퍼
 
 
 /* Line 189 of yacc.c  */
-#line 96 "main.tab.c"
+#line 106 "main.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -115,7 +125,7 @@ const YYNode ZERO_NODE = {0};
 /* "%code requires" blocks.  */
 
 /* Line 209 of yacc.c  */
-#line 94 "main.y"
+#line 104 "main.y"
 
 	#include "yynode.h"
 	#include "linkedlist.h"
@@ -123,7 +133,7 @@ const YYNode ZERO_NODE = {0};
 
 
 /* Line 209 of yacc.c  */
-#line 127 "main.tab.c"
+#line 137 "main.tab.c"
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -167,7 +177,7 @@ typedef union YYSTYPE
 {
 
 /* Line 214 of yacc.c  */
-#line 99 "main.y"
+#line 109 "main.y"
 
 	char name[1024];
 	int intData;
@@ -178,7 +188,7 @@ typedef union YYSTYPE
 
 
 /* Line 214 of yacc.c  */
-#line 182 "main.tab.c"
+#line 192 "main.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -190,7 +200,7 @@ typedef union YYSTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 194 "main.tab.c"
+#line 204 "main.tab.c"
 
 #ifdef short
 # undef short
@@ -506,14 +516,14 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   110,   110,   116,   129,   134,   142,   155,   158,   167,
-     167,   172,   177,   180,   201,   210,   221,   222,   225,   237,
-     254,   261,   265,   272,   281,   282,   283,   284,   285,   286,
-     287,   294,   302,   312,   324,   335,   350,   365,   383,   394,
-     410,   420,   436,   441,   450,   455,   464,   491,   492,   495,
-     499,   508,   515,   516,   530,   567,   572,   583,   587,   594,
-     600,   606,   609,   617,   632,   647,   648,   651,   652,   653,
-     654,   655,   656,   659,   660,   663,   664
+       0,   120,   120,   234,   247,   252,   261,   275,   278,   283,
+     283,   288,   293,   296,   309,   319,   331,   332,   335,   347,
+     364,   372,   376,   383,   392,   393,   394,   395,   396,   397,
+     398,   405,   413,   423,   435,   446,   461,   476,   494,   505,
+     521,   531,   547,   552,   564,   570,   580,   615,   616,   619,
+     623,   632,   639,   640,   654,   698,   703,   714,   718,   725,
+     731,   737,   740,   743,   758,   773,   774,   777,   778,   779,
+     780,   781,   782,   785,   786,   789,   790
 };
 #endif
 
@@ -1514,15 +1524,123 @@ yyreduce:
         case 2:
 
 /* Line 1455 of yacc.c  */
-#line 110 "main.y"
+#line 120 "main.y"
     {
+		// 전역변수 선언
+		List globalVarList = (yyvsp[(4) - (6)].nodeList);
+		for (ListNode *curr = globalVarList; curr; curr = nextNode(globalVarList, curr)) {
+			if (curr->data.type == T_NONE) continue;
+
+			if (curr->data.type == T_ARRAY && curr->data.iParam[1] < 1) {
+				sprintf(buf, "array \"%s\" has zero size", curr->data.sParam[0]);
+				_yyerror(buf, curr->data.iParam[0]);
+				continue;
+			}
+
+			if (!findFromHashTable(&globalVarTable, curr->data.sParam[0])) {
+				insertToHashTable(&globalVarTable, curr->data.sParam[0], curr->data);
+			}
+			else {
+				// 중복 전역변수 선언 - 오류 처리
+				sprintf(buf, "global variable \"%s\" is declared duplicately", curr->data.sParam[0]);
+				_yyerror(buf, curr->data.iParam[0]);
+			}
+		}
+
+		// 서브 루틴 선언
+		List subProcList = (yyvsp[(5) - (6)].nodeList);
+		for (ListNode *curr = subProcList; curr; curr = nextNode(subProcList, curr)) {
+			if (curr->data.type == T_NONE) continue;
+
+			paramSymbolTable = createHashTable();
+			localSymbolTable = createHashTable();
+
+			YYNode sumProcHead = *((YYNode*)curr->data.rParam[0]);
+			List paramVarList = sumProcHead.rParam[0];
+			List localVarList = curr->data.rParam[1];
+			YYNode compound = *((YYNode*)curr->data.rParam[2]);
+
+			// 서브 루틴 이름 등록
+			char *name = sumProcHead.sParam[0];
+			if (!findFromHashTable(&globalVarTable, name)) {
+				if (!findFromHashTable(&symbolTable, name)) {
+					insertToHashTable(&symbolTable, name, sumProcHead);
+				}
+				else {
+					// 중복 서브 루틴 선언 - 오류 처리
+					sprintf(buf, "subprogram \"%s\" is declared duplicately", name);
+					_yyerror(buf, sumProcHead.iParam[0]);
+					continue;
+				}
+			}
+			else {
+				// 서브 루틴과 같은 이름의 전역변수 발견 - 오류 처리
+				sprintf(buf, "subprogram \"%s\" has the same name as a declared global variable", name);
+				_yyerror(buf, sumProcHead.iParam[0]);
+				continue;
+			}
+
+			// 매개변수 처리
+			for (ListNode *i = paramVarList; i; i = nextNode(paramVarList, i)) {
+				if (i->data.type == T_NONE) continue;
+
+				if (!findFromHashTable(&paramSymbolTable, i->data.sParam[0])) {
+					insertToHashTable(&paramSymbolTable, i->data.sParam[0], i->data);
+				}
+				else {
+					// 중복 매개변수 선언 - 오류 처리
+					sprintf(buf, "param variable \"%s\" is declared duplicately", i->data.sParam[0]);
+					_yyerror(buf, i->data.iParam[0]);
+				}
+			}
+
+			// 지역변수 처리
+			for (ListNode *i = localVarList; i; i = nextNode(localVarList, i)) {
+				if (i->data.type == T_NONE) continue;
+
+				if (!findFromHashTable(&localSymbolTable, i->data.sParam[0])) {
+					insertToHashTable(&localSymbolTable, i->data.sParam[0], i->data);
+				}
+				else {
+					// 중복 지역변수 선언 - 오류 처리
+					sprintf(buf, "local variable \"%s\" is declared duplicately", i->data.sParam[0]);
+					_yyerror(buf, i->data.iParam[0]);
+				}
+			}
+
+			// 서브루틴 body 코드 검증
+			List bodyStmtList = compound.rParam[0];
+			found_return = 0;
+			for (ListNode *i = bodyStmtList; i; i = nextNode(bodyStmtList, i)) {
+				checkStatement(&(i->data), 0);
+			}
+
+			if (found_return == 0 && sumProcHead.type == T_FUNCTION) {
+				// 함수인데 리턴문이 없는 오류 - 오류 처리
+				sprintf(buf, "function \"%s\" doesn't have return statement", name);
+				_yyerror(buf, sumProcHead.iParam[0]);
+			}
+			else if (found_return > 0 && sumProcHead.type == T_PROCEDURE) {
+				// 프로시저인데 리턴문이 있는 오류 - 오류 처리
+				sprintf(buf, "procedure \"%s\" has unexpected return statement", name);
+				_yyerror(buf, sumProcHead.iParam[0]);
+			}
+		}
+
+		// 프로그램 body 코드 검증
+		paramSymbolTable = createHashTable();
+		localSymbolTable = createHashTable();
+		List bodyStmtList = (yyvsp[(6) - (6)].nodeData).rParam[0];
+		for (ListNode *curr = bodyStmtList; curr; curr = nextNode(bodyStmtList, curr)) {
+			checkStatement(&(curr->data), 0);
+		}
 	;}
     break;
 
   case 3:
 
 /* Line 1455 of yacc.c  */
-#line 116 "main.y"
+#line 234 "main.y"
     {
 		(yyval.nodeList) = (yyvsp[(2) - (4)].nodeList);
 		for (ListNode *curr = (yyvsp[(2) - (4)].nodeList); curr; curr = nextNode((yyvsp[(2) - (4)].nodeList), curr)) {
@@ -1541,7 +1659,7 @@ yyreduce:
   case 4:
 
 /* Line 1455 of yacc.c  */
-#line 129 "main.y"
+#line 247 "main.y"
     {
 		(yyval.nodeList) = createList();
 	;}
@@ -1550,12 +1668,13 @@ yyreduce:
   case 5:
 
 /* Line 1455 of yacc.c  */
-#line 134 "main.y"
+#line 252 "main.y"
     {
 		(yyval.nodeList) = createList();
 		YYNode node = {0};
 		node.type = T_ID;
 		node.iParam[0] = yylineno;
+		node.sParam[0] = malloc(BUF_SIZE);
 		strcpy(node.sParam[0], (yyvsp[(1) - (1)].name)); // 식별자 이름
 		appendToList(&((yyval.nodeList)), node);
 	;}
@@ -1564,12 +1683,13 @@ yyreduce:
   case 6:
 
 /* Line 1455 of yacc.c  */
-#line 142 "main.y"
+#line 261 "main.y"
     {
 		(yyval.nodeList) = createList();
 		YYNode node = {0};
 		node.type = T_ID;
 		node.iParam[0] = yylineno;
+		node.sParam[0] = malloc(BUF_SIZE);
 		strcpy(node.sParam[0], (yyvsp[(1) - (3)].name)); // 식별자 이름
 		appendToList(&((yyval.nodeList)), node);
 		concatList(&((yyval.nodeList)), (yyvsp[(3) - (3)].nodeList));
@@ -1579,7 +1699,7 @@ yyreduce:
   case 7:
 
 /* Line 1455 of yacc.c  */
-#line 155 "main.y"
+#line 275 "main.y"
     {
 		(yyval.intData) = T_VAR;
 	;}
@@ -1588,20 +1708,16 @@ yyreduce:
   case 8:
 
 /* Line 1455 of yacc.c  */
-#line 158 "main.y"
+#line 278 "main.y"
     {
 		(yyval.intData) = (yyvsp[(3) - (4)].intData);  // 배열 길이
-		if ((yyvsp[(3) - (4)].intData) < 1) {
-			sprintf(buf, "array must have positive size");
-			yyerror(buf);
-		}
 	;}
     break;
 
   case 11:
 
 /* Line 1455 of yacc.c  */
-#line 172 "main.y"
+#line 288 "main.y"
     {
 		(yyval.nodeList) = createList();
 		appendToList(&((yyval.nodeList)), (yyvsp[(1) - (2)].nodeData));
@@ -1612,45 +1728,38 @@ yyreduce:
   case 12:
 
 /* Line 1455 of yacc.c  */
-#line 177 "main.y"
+#line 293 "main.y"
     { (yyval.nodeList) = createList(); ;}
     break;
 
   case 13:
 
 /* Line 1455 of yacc.c  */
-#line 180 "main.y"
+#line 296 "main.y"
     {
 		(yyval.nodeData) = ZERO_NODE;
 		(yyval.nodeData).type = T_SUBPROGRAM_DECL;
 		(yyval.nodeData).iParam[0] = yylineno;
+		(yyval.nodeData).rParam[0] = malloc(sizeof(YYNode));
+		(yyval.nodeData).rParam[2] = malloc(sizeof(YYNode));
 
-		if (!findFromHashTable(&symbolTable, (yyvsp[(1) - (3)].nodeData).sParam[0])) {
-			insertToHashTable(&symbolTable, (yyvsp[(1) - (3)].nodeData).sParam[0], (yyvsp[(1) - (3)].nodeData));
-			(yyval.nodeData).rParam[0] = malloc(sizeof(YYNode));
-			(yyval.nodeData).rParam[2] = malloc(sizeof(YYNode));
-
-			*((YYNode*)(yyval.nodeData).rParam[0]) = (yyvsp[(1) - (3)].nodeData); // 함수 시그니처 (nodeData)
-			(yyval.nodeData).rParam[1] = (yyvsp[(2) - (3)].nodeList); // 지역변수 목록 (nodeList)
-			*((YYNode*)(yyval.nodeData).rParam[2]) = (yyvsp[(3) - (3)].nodeData); // compound_statement (nodeData)
-		}
-		else {
-			sprintf(buf, "identifier \"%s\" is declared duplicately", (yyvsp[(1) - (3)].nodeData).sParam[0]);
-			_yyerror(buf, (yyvsp[(1) - (3)].nodeData).iParam[0]);
-		}
+		*((YYNode*)(yyval.nodeData).rParam[0]) = (yyvsp[(1) - (3)].nodeData); // 함수 시그니처 (nodeData)
+		(yyval.nodeData).rParam[1] = (yyvsp[(2) - (3)].nodeList); // 지역변수 목록 (nodeList)
+		*((YYNode*)(yyval.nodeData).rParam[2]) = (yyvsp[(3) - (3)].nodeData); // compound_statement (nodeData)
 	;}
     break;
 
   case 14:
 
 /* Line 1455 of yacc.c  */
-#line 201 "main.y"
+#line 309 "main.y"
     {
 		YYNode node;
 		node.type = T_FUNCTION;
 		node.iParam[0] = yylineno;
 		node.iParam[1] = lengthOfList((yyvsp[(3) - (6)].nodeList)); // 매개변수 개수
 		node.rParam[0] = (yyvsp[(3) - (6)].nodeList); // 매개변수 목록 (nodeList)
+		node.sParam[0] = malloc(BUF_SIZE);
 		strcpy(node.sParam[0], (yyvsp[(2) - (6)].name)); // 함수 이름
 		(yyval.nodeData) = node;
 	;}
@@ -1659,13 +1768,14 @@ yyreduce:
   case 15:
 
 /* Line 1455 of yacc.c  */
-#line 210 "main.y"
+#line 319 "main.y"
     {
 		YYNode node;
 		node.type = T_PROCEDURE;
 		node.iParam[0] = yylineno;
 		node.iParam[1] = lengthOfList((yyvsp[(3) - (4)].nodeList)); // 매개변수 개수
 		node.rParam[0] = (yyvsp[(3) - (4)].nodeList); // 매개변수 목록 (nodeList)
+		node.sParam[0] = malloc(BUF_SIZE);
 		strcpy(node.sParam[0], (yyvsp[(2) - (4)].name)); // 프로시저 이름
 		(yyval.nodeData) = node;
 	;}
@@ -1674,21 +1784,21 @@ yyreduce:
   case 16:
 
 /* Line 1455 of yacc.c  */
-#line 221 "main.y"
+#line 331 "main.y"
     { (yyval.nodeList) = (yyvsp[(2) - (3)].nodeList); ;}
     break;
 
   case 17:
 
 /* Line 1455 of yacc.c  */
-#line 222 "main.y"
+#line 332 "main.y"
     { (yyval.nodeList) = createList(); ;}
     break;
 
   case 18:
 
 /* Line 1455 of yacc.c  */
-#line 225 "main.y"
+#line 335 "main.y"
     {
 		(yyval.nodeList) = (yyvsp[(1) - (3)].nodeList);
 		for (ListNode *curr = (yyvsp[(1) - (3)].nodeList); curr; curr = nextNode((yyvsp[(1) - (3)].nodeList), curr)) {
@@ -1706,7 +1816,7 @@ yyreduce:
   case 19:
 
 /* Line 1455 of yacc.c  */
-#line 237 "main.y"
+#line 347 "main.y"
     {
 		(yyval.nodeList) = (yyvsp[(1) - (5)].nodeList);
 		for (ListNode *curr = (yyvsp[(1) - (5)].nodeList); curr; curr = nextNode((yyvsp[(1) - (5)].nodeList), curr)) {
@@ -1725,8 +1835,9 @@ yyreduce:
   case 20:
 
 /* Line 1455 of yacc.c  */
-#line 254 "main.y"
+#line 364 "main.y"
     {
+		(yyval.nodeData) = ZERO_NODE;
 		(yyval.nodeData).type = T_COMPOUND;
 		(yyval.nodeData).iParam[0] = yylineno;
 		(yyval.nodeData).rParam[0] = (yyvsp[(2) - (3)].nodeList); // statement_list (nodeList)
@@ -1736,7 +1847,7 @@ yyreduce:
   case 21:
 
 /* Line 1455 of yacc.c  */
-#line 261 "main.y"
+#line 372 "main.y"
     {
 		(yyval.nodeList) = createList();
 		appendToList(&((yyval.nodeList)), (yyvsp[(1) - (1)].nodeData));
@@ -1746,7 +1857,7 @@ yyreduce:
   case 22:
 
 /* Line 1455 of yacc.c  */
-#line 265 "main.y"
+#line 376 "main.y"
     {
 		(yyval.nodeList) = createList();
 		appendToList(&((yyval.nodeList)), (yyvsp[(1) - (3)].nodeData));
@@ -1757,7 +1868,7 @@ yyreduce:
   case 23:
 
 /* Line 1455 of yacc.c  */
-#line 272 "main.y"
+#line 383 "main.y"
     {
 		(yyval.nodeData).type = T_ASSIGN;
 		(yyval.nodeData).iParam[0] = yylineno;
@@ -1772,49 +1883,49 @@ yyreduce:
   case 24:
 
 /* Line 1455 of yacc.c  */
-#line 281 "main.y"
-    {(yyval.nodeData) = (yyvsp[(1) - (1)].nodeData);;}
+#line 392 "main.y"
+    { (yyval.nodeData) = (yyvsp[(1) - (1)].nodeData); ;}
     break;
 
   case 25:
 
 /* Line 1455 of yacc.c  */
-#line 282 "main.y"
-    {(yyval.nodeData) = (yyvsp[(1) - (1)].nodeData);;}
+#line 393 "main.y"
+    { (yyval.nodeData) = (yyvsp[(1) - (1)].nodeData); ;}
     break;
 
   case 26:
 
 /* Line 1455 of yacc.c  */
-#line 283 "main.y"
+#line 394 "main.y"
     { (yyval.nodeData) = (yyvsp[(1) - (1)].nodeData); ;}
     break;
 
   case 27:
 
 /* Line 1455 of yacc.c  */
-#line 284 "main.y"
-    {(yyval.nodeData) = (yyvsp[(1) - (1)].nodeData);;}
+#line 395 "main.y"
+    { (yyval.nodeData) = (yyvsp[(1) - (1)].nodeData); ;}
     break;
 
   case 28:
 
 /* Line 1455 of yacc.c  */
-#line 285 "main.y"
-    {(yyval.nodeData) = (yyvsp[(1) - (1)].nodeData);;}
+#line 396 "main.y"
+    { (yyval.nodeData) = (yyvsp[(1) - (1)].nodeData); ;}
     break;
 
   case 29:
 
 /* Line 1455 of yacc.c  */
-#line 286 "main.y"
-    {(yyval.nodeData) = (yyvsp[(1) - (1)].nodeData);;}
+#line 397 "main.y"
+    { (yyval.nodeData) = (yyvsp[(1) - (1)].nodeData); ;}
     break;
 
   case 30:
 
 /* Line 1455 of yacc.c  */
-#line 287 "main.y"
+#line 398 "main.y"
     {
 		(yyval.nodeData).type = T_RETURN;
 		(yyval.nodeData).iParam[0] = yylineno;
@@ -1827,7 +1938,7 @@ yyreduce:
   case 31:
 
 /* Line 1455 of yacc.c  */
-#line 294 "main.y"
+#line 405 "main.y"
     {
 		(yyval.nodeData).type = T_NONE;
 		(yyval.nodeData).iParam[0] = yylineno;
@@ -1837,7 +1948,7 @@ yyreduce:
   case 32:
 
 /* Line 1455 of yacc.c  */
-#line 302 "main.y"
+#line 413 "main.y"
     {
 		(yyval.nodeData) = ZERO_NODE;
 		(yyval.nodeData).type = T_IF;
@@ -1853,7 +1964,7 @@ yyreduce:
   case 33:
 
 /* Line 1455 of yacc.c  */
-#line 312 "main.y"
+#line 423 "main.y"
     {
 		(yyval.nodeData) = ZERO_NODE;
 		(yyval.nodeData).type = T_IF_ELSE;
@@ -1871,7 +1982,7 @@ yyreduce:
   case 34:
 
 /* Line 1455 of yacc.c  */
-#line 324 "main.y"
+#line 435 "main.y"
     {
 		(yyval.nodeData) = ZERO_NODE;
 		(yyval.nodeData).type = T_IF_ELIF;
@@ -1888,7 +1999,7 @@ yyreduce:
   case 35:
 
 /* Line 1455 of yacc.c  */
-#line 335 "main.y"
+#line 446 "main.y"
     {
 		(yyval.nodeData) = ZERO_NODE;
 		(yyval.nodeData).type = T_IF_ELIF_ELSE;
@@ -1907,7 +2018,7 @@ yyreduce:
   case 36:
 
 /* Line 1455 of yacc.c  */
-#line 350 "main.y"
+#line 461 "main.y"
     {
 		(yyval.nodeList) = createList();
 
@@ -1928,7 +2039,7 @@ yyreduce:
   case 37:
 
 /* Line 1455 of yacc.c  */
-#line 365 "main.y"
+#line 476 "main.y"
     {
 		(yyval.nodeList) = createList();
 
@@ -1948,7 +2059,7 @@ yyreduce:
   case 38:
 
 /* Line 1455 of yacc.c  */
-#line 383 "main.y"
+#line 494 "main.y"
     {
 		(yyval.nodeData) = ZERO_NODE;
 		(yyval.nodeData).type = T_WHILE_STMT;
@@ -1965,7 +2076,7 @@ yyreduce:
   case 39:
 
 /* Line 1455 of yacc.c  */
-#line 394 "main.y"
+#line 505 "main.y"
     {
 		(yyval.nodeData) = ZERO_NODE;
 		(yyval.nodeData).type = T_WHILE_ELSE_STMT;
@@ -1983,7 +2094,7 @@ yyreduce:
   case 40:
 
 /* Line 1455 of yacc.c  */
-#line 410 "main.y"
+#line 521 "main.y"
     {
 		(yyval.nodeData) = ZERO_NODE;
 		(yyval.nodeData).type = T_FOR_STMT;
@@ -1999,7 +2110,7 @@ yyreduce:
   case 41:
 
 /* Line 1455 of yacc.c  */
-#line 420 "main.y"
+#line 531 "main.y"
     {
 		(yyval.nodeData) = ZERO_NODE;
 		(yyval.nodeData).type = T_FOR_ELSE_STMT;
@@ -2017,10 +2128,10 @@ yyreduce:
   case 42:
 
 /* Line 1455 of yacc.c  */
-#line 436 "main.y"
+#line 547 "main.y"
     {
 		(yyval.nodeData) = ZERO_NODE;
-		(yyval.nodeData).type = T_PRINT_STMT;
+		(yyval.nodeData).type = T_NONE;
 		(yyval.nodeData).iParam[0] = yylineno;
 	;}
     break;
@@ -2028,21 +2139,25 @@ yyreduce:
   case 43:
 
 /* Line 1455 of yacc.c  */
-#line 441 "main.y"
+#line 552 "main.y"
     {
 		(yyval.nodeData) = (yyvsp[(3) - (4)].nodeData);
 		(yyval.nodeData).type = T_PRINT_STMT;
 		(yyval.nodeData).iParam[0] = yylineno;
+		(yyval.nodeData).rParam[0] = malloc(sizeof(YYNode));
+
+		*((YYNode*)(yyval.nodeData).rParam[0]) = (yyvsp[(3) - (4)].nodeData); // expression (nodeData)
 	;}
     break;
 
   case 44:
 
 /* Line 1455 of yacc.c  */
-#line 450 "main.y"
+#line 564 "main.y"
     {
 		(yyval.nodeData).type = T_VAR_USING;
 		(yyval.nodeData).iParam[0] = yylineno;
+		(yyval.nodeData).sParam[0] = malloc(BUF_SIZE);
 		strcpy((yyval.nodeData).sParam[0], (yyvsp[(1) - (1)].name)); // 식별자 이름
 	;}
     break;
@@ -2050,10 +2165,11 @@ yyreduce:
   case 45:
 
 /* Line 1455 of yacc.c  */
-#line 455 "main.y"
+#line 570 "main.y"
     {
 		(yyval.nodeData).type = T_ARRAY_USING;
 		(yyval.nodeData).iParam[0] = yylineno;
+		(yyval.nodeData).sParam[0] = malloc(BUF_SIZE);
 		strcpy((yyval.nodeData).sParam[0], (yyvsp[(1) - (4)].name)); // 식별자 이름
 	;}
     break;
@@ -2061,52 +2177,60 @@ yyreduce:
   case 46:
 
 /* Line 1455 of yacc.c  */
-#line 464 "main.y"
+#line 580 "main.y"
     {
-		YYNode *nodePtr = findFromHashTable(&symbolTable, (yyvsp[(1) - (4)].name));
+		(yyval.nodeData) = ZERO_NODE;
+		(yyval.nodeData).type = T_CALL;
+
 		int paraLen = lengthOfList((yyvsp[(3) - (4)].nodeList));
 		(yyval.nodeData).iParam[0] = yylineno;
+		(yyval.nodeData).iParam[1] = paraLen;
+		(yyval.nodeData).sParam[0] = malloc(BUF_SIZE);
+		strcpy((yyval.nodeData).sParam[0], (yyvsp[(1) - (4)].name));
+		(yyval.nodeData).rParam[0] = (yyvsp[(3) - (4)].nodeList);
 
+		/*
 		if (nodePtr == NULL) {
-			sprintf(buf, "undeclared identifier \"%s\"", (yyvsp[(1) - (4)].name));
+			sprintf(buf, "undeclared subprogram \"%s\"", $1);
 			yyerror(buf);
-			(yyval.nodeData).type = T_FUNCTION_CALL;
+			$$.type = T_FUNCTION_CALL;
 		}
 		else if (nodePtr->type != T_FUNCTION && nodePtr->type != T_PROCEDURE) {
-			sprintf(buf, "\"%s\" is not function or procedure", (yyvsp[(1) - (4)].name));
+			sprintf(buf, "\"%s\" is not function or procedure", $1);
 			yyerror(buf);
-			(yyval.nodeData).type = T_FUNCTION_CALL;
+			$$.type = T_FUNCTION_CALL;
 		}
 		else if (nodePtr->iParam[1] != paraLen) {
-			sprintf(buf, "\"%s\" expect %d parameter, but %d given", (yyvsp[(1) - (4)].name), nodePtr->iParam[1], paraLen);
+			sprintf(buf, "\"%s\" expect %d parameter, but %d given", $1, nodePtr->iParam[1], paraLen);
 			yyerror(buf);
-			(yyval.nodeData).type = T_FUNCTION_CALL;
+			$$.type = T_FUNCTION_CALL;
 		}
 		else {
-			if (nodePtr->type == T_FUNCTION) (yyval.nodeData).type = T_FUNCTION_CALL;
-			else (yyval.nodeData).type = T_PROCEDURE_CALL;
+			if (nodePtr->type == T_FUNCTION) $$.type = T_FUNCTION_CALL;
+			else $$.type = T_PROCEDURE_CALL;
 		}
+		*/
 	;}
     break;
 
   case 47:
 
 /* Line 1455 of yacc.c  */
-#line 491 "main.y"
+#line 615 "main.y"
     { (yyval.nodeList) = (yyvsp[(1) - (1)].nodeList); ;}
     break;
 
   case 48:
 
 /* Line 1455 of yacc.c  */
-#line 492 "main.y"
+#line 616 "main.y"
     { (yyval.nodeList) = createList(); ;}
     break;
 
   case 49:
 
 /* Line 1455 of yacc.c  */
-#line 495 "main.y"
+#line 619 "main.y"
     {
 		(yyval.nodeList) = createList();
 		appendToList(&((yyval.nodeList)), (yyvsp[(1) - (1)].nodeData));
@@ -2116,7 +2240,7 @@ yyreduce:
   case 50:
 
 /* Line 1455 of yacc.c  */
-#line 499 "main.y"
+#line 623 "main.y"
     {
 		(yyval.nodeList) = createList();
 		appendToList(&((yyval.nodeList)), (yyvsp[(1) - (3)].nodeData));
@@ -2127,7 +2251,7 @@ yyreduce:
   case 51:
 
 /* Line 1455 of yacc.c  */
-#line 508 "main.y"
+#line 632 "main.y"
     {
 		(yyval.nodeData) = (yyvsp[(1) - (1)].nodeData);
 
@@ -2140,14 +2264,14 @@ yyreduce:
   case 52:
 
 /* Line 1455 of yacc.c  */
-#line 515 "main.y"
+#line 639 "main.y"
     { (yyval.nodeData) = (yyvsp[(1) - (1)].nodeData); ;}
     break;
 
   case 53:
 
 /* Line 1455 of yacc.c  */
-#line 516 "main.y"
+#line 640 "main.y"
     {
 		(yyval.nodeData).type = T_RELOP_EXPR;
 		(yyval.nodeData).iParam[0] = yylineno;
@@ -2165,18 +2289,25 @@ yyreduce:
   case 54:
 
 /* Line 1455 of yacc.c  */
-#line 530 "main.y"
+#line 654 "main.y"
     {
+		(yyval.nodeData) = ZERO_NODE;
+		(yyval.nodeData).iParam[2] = L_VALUE; // right l-value
+
 		int llistLen = lengthOfList((yyvsp[(1) - (3)].nodeData).rParam[0]), rlistLen = lengthOfList((yyvsp[(3) - (3)].nodeData).rParam[0]);
 		if (rlistLen > 1) {
+			// IN 우항은 무조건 r-value - 오류 처리
 			sprintf(buf, "expect l-value on the right side of \"in\", but r-value given");
 			yyerror(buf);
+			(yyval.nodeData).iParam[2] = R_VALUE;
 		}
 		else {
 			ListNode rNode = *((ListNode*)(yyvsp[(3) - (3)].nodeData).rParam[0]);
 			if (rNode.data.type != T_VAR_USING) {
+				// IN 우항은 무조건 r-value - 오류 처리
 				sprintf(buf, "expect l-value on the right side of \"in\", but r-value given");
 				yyerror(buf);
+				(yyval.nodeData).iParam[2] = R_VALUE;
 			}
 		}
 
@@ -2188,7 +2319,7 @@ yyreduce:
 		}
 		else {
 			ListNode lNode = *((ListNode*)(yyvsp[(1) - (3)].nodeData).rParam[0]);
-			if (lNode.data.type == T_VAR || lNode.data.type == T_ARRAY) {
+			if (lNode.data.type == T_VAR_USING || lNode.data.type == T_ARRAY_USING) {
 				(yyval.nodeData).iParam[1] = L_VALUE; // left l-value
 			}
 			else {
@@ -2206,7 +2337,7 @@ yyreduce:
   case 55:
 
 /* Line 1455 of yacc.c  */
-#line 567 "main.y"
+#line 698 "main.y"
     {
 		(yyval.nodeData).type = T_SIMPLE_EXPR;
 		(yyval.nodeData).iParam[0] = yylineno;
@@ -2217,7 +2348,7 @@ yyreduce:
   case 56:
 
 /* Line 1455 of yacc.c  */
-#line 572 "main.y"
+#line 703 "main.y"
     {
 		(yyval.nodeData).type = T_SIMPLE_EXPR;
 		(yyval.nodeData).iParam[0] = yylineno;
@@ -2232,7 +2363,7 @@ yyreduce:
   case 57:
 
 /* Line 1455 of yacc.c  */
-#line 583 "main.y"
+#line 714 "main.y"
     {
 		(yyval.nodeList) = createList();
 		appendToList(&((yyval.nodeList)), (yyvsp[(1) - (1)].nodeData));
@@ -2242,7 +2373,7 @@ yyreduce:
   case 58:
 
 /* Line 1455 of yacc.c  */
-#line 587 "main.y"
+#line 718 "main.y"
     {
 		(yyval.nodeList) = createList();
 		appendToList(&((yyval.nodeList)), (yyvsp[(1) - (3)].nodeData));
@@ -2253,7 +2384,7 @@ yyreduce:
   case 59:
 
 /* Line 1455 of yacc.c  */
-#line 594 "main.y"
+#line 725 "main.y"
     {
 		(yyval.nodeData) = ZERO_NODE;
 		(yyval.nodeData).type = T_CONST_INTEGER;
@@ -2265,7 +2396,7 @@ yyreduce:
   case 60:
 
 /* Line 1455 of yacc.c  */
-#line 600 "main.y"
+#line 731 "main.y"
     {
 		(yyval.nodeData) = ZERO_NODE;
 		(yyval.nodeData).type = T_CONST_FLOAT;
@@ -2277,7 +2408,7 @@ yyreduce:
   case 61:
 
 /* Line 1455 of yacc.c  */
-#line 606 "main.y"
+#line 737 "main.y"
     {
 		(yyval.nodeData) = (yyvsp[(1) - (1)].nodeData); // variable (nodeData, type : T_VAR_USING or T_ARRAY_USING)
 	;}
@@ -2286,21 +2417,16 @@ yyreduce:
   case 62:
 
 /* Line 1455 of yacc.c  */
-#line 609 "main.y"
+#line 740 "main.y"
     {
-		if ((yyvsp[(1) - (1)].nodeData).type == T_PROCEDURE_CALL) {
-			sprintf(buf, "\"%s\" is not function so it doesn't have return value", (yyvsp[(1) - (1)].nodeData).sParam[0]);
-			yyerror(buf);
-		}
-		(yyval.nodeData).type = T_DYNAMIC_FACTOR;
-		(yyval.nodeData).iParam[0] = yylineno;
+		(yyval.nodeData) = (yyvsp[(1) - (1)].nodeData);
 	;}
     break;
 
   case 63:
 
 /* Line 1455 of yacc.c  */
-#line 617 "main.y"
+#line 743 "main.y"
     {
 		(yyval.nodeData).iParam[0] = yylineno;
 		if ((yyvsp[(2) - (2)].nodeData).type == T_CONST_INTEGER || (yyvsp[(2) - (2)].nodeData).type == T_CONST_FLOAT) {
@@ -2313,7 +2439,7 @@ yyreduce:
 			else (yyval.nodeData).fParam[1] = 1;
 		}
 		else {
-			(yyval.nodeData).type = T_DYNAMIC_FACTOR;
+			(yyval.nodeData) = (yyvsp[(2) - (2)].nodeData);
 		}
 	;}
     break;
@@ -2321,7 +2447,7 @@ yyreduce:
   case 64:
 
 /* Line 1455 of yacc.c  */
-#line 632 "main.y"
+#line 758 "main.y"
     {
 		(yyval.nodeData).iParam[0] = yylineno;
 		if ((yyvsp[(2) - (2)].nodeData).type == T_CONST_INTEGER || (yyvsp[(2) - (2)].nodeData).type == T_CONST_FLOAT) {
@@ -2330,7 +2456,7 @@ yyreduce:
 			(yyval.nodeData).fParam[1] = -(yyvsp[(2) - (2)].nodeData).fParam[1];
 		}
 		else {
-			(yyval.nodeData).type = T_DYNAMIC_FACTOR;
+			(yyval.nodeData) = (yyvsp[(2) - (2)].nodeData);
 		}
 	;}
     break;
@@ -2338,91 +2464,91 @@ yyreduce:
   case 65:
 
 /* Line 1455 of yacc.c  */
-#line 647 "main.y"
+#line 773 "main.y"
     {;}
     break;
 
   case 66:
 
 /* Line 1455 of yacc.c  */
-#line 648 "main.y"
+#line 774 "main.y"
     {;}
     break;
 
   case 67:
 
 /* Line 1455 of yacc.c  */
-#line 651 "main.y"
+#line 777 "main.y"
     {;}
     break;
 
   case 68:
 
 /* Line 1455 of yacc.c  */
-#line 652 "main.y"
+#line 778 "main.y"
     {;}
     break;
 
   case 69:
 
 /* Line 1455 of yacc.c  */
-#line 653 "main.y"
+#line 779 "main.y"
     {;}
     break;
 
   case 70:
 
 /* Line 1455 of yacc.c  */
-#line 654 "main.y"
+#line 780 "main.y"
     {;}
     break;
 
   case 71:
 
 /* Line 1455 of yacc.c  */
-#line 655 "main.y"
+#line 781 "main.y"
     {;}
     break;
 
   case 72:
 
 /* Line 1455 of yacc.c  */
-#line 656 "main.y"
+#line 782 "main.y"
     {;}
     break;
 
   case 73:
 
 /* Line 1455 of yacc.c  */
-#line 659 "main.y"
+#line 785 "main.y"
     {;}
     break;
 
   case 74:
 
 /* Line 1455 of yacc.c  */
-#line 660 "main.y"
+#line 786 "main.y"
     {;}
     break;
 
   case 75:
 
 /* Line 1455 of yacc.c  */
-#line 663 "main.y"
+#line 789 "main.y"
     {;}
     break;
 
   case 76:
 
 /* Line 1455 of yacc.c  */
-#line 664 "main.y"
+#line 790 "main.y"
     {;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 2426 "main.tab.c"
+#line 2552 "main.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2634,21 +2760,350 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 667 "main.y"
+#line 793 "main.y"
 
+
+YYNode *findVariable(const char *name) {
+	// 지역변수 -> 매개변수 -> 전역변수 순으로 찾는다
+	YYNode *result = NULL;
+
+	if ((result = findFromHashTable(&localSymbolTable, name)) ||
+		(result = findFromHashTable(&paramSymbolTable, name)) ||
+		(result = findFromHashTable(&globalVarTable, name))) {
+		return result;
+	}
+
+	return NULL; // 선언하지 않은 변수
+}
+
+int checkUndeclaredVar(YYNode *_node) {
+	if (!findVariable(_node->sParam[0])) {
+		YYNode *temp = NULL;
+		if (!(temp = findFromHashTable(&symbolTable, _node->sParam[0]))) {
+			// 선언되지 않은 변수 - 오류 처리
+			sprintf(buf, "undeclared variable \"%s\"", _node->sParam[0]);
+			_yyerror(buf, _node->iParam[0]);
+		}
+		else {
+			// 해당 식별자가 함수나 프로시저인 경우의 오류 (변수가 와야함) - 오류 처리
+			if (temp->type == T_FUNCTION) {
+				sprintf(buf, "\"%s\" is a function, not a variable", _node->sParam[0]);
+				_yyerror(buf, _node->iParam[0]);
+			}
+			else {
+				sprintf(buf, "\"%s\" is a procedure, not a variable", _node->sParam[0]);
+				_yyerror(buf, _node->iParam[0]);
+			}
+		}
+		return 0;
+	}
+	return 1;
+}
+
+int checkUndeclaredFunc(YYNode *_node) {
+	if (!findFromHashTable(&symbolTable, _node->sParam[0])) {
+		// 선언되지 않은 서브 루틴 - 오류 처리
+		sprintf(buf, "undeclared subprogram \"%s\"", _node->sParam[0]);
+		_yyerror(buf, _node->iParam[0]);
+		return 0;
+	}
+	return 1;
+}
+
+int checkStatement(YYNode *_node, int allowCompound) {
+	YYNode data = *_node;
+
+	YYNode left, right, begin, end;
+	List list;
+
+	switch (data.type) {
+	case T_ASSIGN:
+		left = *((YYNode*)data.rParam[0]);
+		right = *((YYNode*)data.rParam[1]);
+
+		checkUndeclaredVar(&left);
+		checkExpression(&right);
+
+		YYNode *declLeft = findVariable(left.sParam[0]);
+		if (declLeft) {
+			if (left.type == T_VAR_USING && declLeft->type == T_ARRAY) {
+				// 배열 전체에 직접 대입 - 오류 처리
+				sprintf(buf, "can't assign directly/entirely to the array \"%s\". please use an index", left.sParam[0]);
+				_yyerror(buf, left.iParam[0]);
+			}
+			else if (left.type == T_ARRAY_USING && declLeft->type == T_VAR) {
+				// 단일 변수에 배열처럼 인덱스 참조 - 오류 처리
+				sprintf(buf, "can't indexing the single variable \"%s\"", left.sParam[0]);
+				_yyerror(buf, left.iParam[0]);
+			}
+		}
+
+		break;
+
+	case T_IF:
+		left = *((YYNode*)data.rParam[0]);
+		right = *((YYNode*)data.rParam[1]);
+		checkExpression(&left);
+		checkStatement(&right, 1);
+		break;
+
+	case T_IF_ELSE:
+		left = *((YYNode*)data.rParam[0]);
+		right = *((YYNode*)data.rParam[1]);
+		end = *((YYNode*)data.rParam[2]);
+		checkExpression(&left);
+		checkStatement(&right, 1);
+		checkStatement(&end, 1);
+		break;
+
+	case T_IF_ELIF:
+		left = *((YYNode*)data.rParam[0]);
+		right = *((YYNode*)data.rParam[1]);
+		list = data.rParam[2];
+		checkExpression(&left);
+		checkStatement(&right, 1);
+
+		for (ListNode *curr = list; curr; curr = nextNode(list, curr)) {
+			checkExpression(curr->data.rParam[0]);
+			checkStatement(curr->data.rParam[1], 1);
+		}
+		break;
+
+	case T_IF_ELIF_ELSE:
+		left = *((YYNode*)data.rParam[0]);
+		right = *((YYNode*)data.rParam[1]);
+		list = data.rParam[2];
+		end = *((YYNode*)data.rParam[3]);
+		checkExpression(&left);
+		checkStatement(&right, 1);
+
+		for (ListNode *curr = list; curr; curr = nextNode(list, curr)) {
+			checkExpression(curr->data.rParam[0]);
+			checkStatement(curr->data.rParam[1], 1);
+		}
+		checkStatement(&end, 1);
+		break;
+
+	case T_WHILE_STMT:
+		left = *((YYNode*)data.rParam[0]);
+		right = *((YYNode*)data.rParam[1]);
+		checkExpression(&left);
+		checkStatement(&right, 1);
+		break;
+
+	case T_WHILE_ELSE_STMT:
+		left = *((YYNode*)data.rParam[0]);
+		right = *((YYNode*)data.rParam[1]);
+		end = *((YYNode*)data.rParam[2]);
+		checkExpression(&left);
+		checkStatement(&right, 1);
+		checkStatement(&end, 1);
+		break;
+
+	case T_FOR_STMT:
+		left = *((YYNode*)data.rParam[0]);
+		right = *((YYNode*)data.rParam[1]);
+		checkExpression(&left);
+
+		if (left.iParam[1] != L_VALUE) {
+			// for 루프에서 쓰이는 in 문에서는 좌항에 L-Value가 필수임 - 오류 처리
+			sprintf(buf, "expect l-value on the left side of \"in\" within for-loop, but r-value given");
+			_yyerror(buf, left.iParam[0]);
+		}
+
+		checkStatement(&right, 1);
+		break;
+
+	case T_FOR_ELSE_STMT:
+		left = *((YYNode*)data.rParam[0]);
+		right = *((YYNode*)data.rParam[1]);
+		end = *((YYNode*)data.rParam[2]);
+		checkExpression(&left);
+
+		if (left.iParam[1] != L_VALUE) {
+			// for 루프에서 쓰이는 in 문에서는 좌항에 L-Value가 필수임 - 오류 처리
+			sprintf(buf, "expect l-value on the left side of \"in\" within for-loop, but r-value given");
+			_yyerror(buf, left.iParam[0]);
+		}
+
+		checkStatement(&right, 1);
+		checkStatement(&end, 1);
+		break;
+
+	case T_PRINT_STMT:
+		left = *((YYNode*)data.rParam[0]);
+		checkExpression(&left);
+		break;
+
+	case T_RETURN:
+		found_return = 1;
+		left = *((YYNode*)data.rParam[0]);
+		checkExpression(&left);
+		break;
+
+	case T_COMPOUND:
+		if (!allowCompound) {
+			// BEGIN~END문은 연속 중첩 불가능 (if, for문 등의 아래에 나와야 함) - 오류 처리
+			sprintf(buf, "begin~end statement can't be nested directly here");
+			_yyerror(buf, data.iParam[0]);
+		}
+
+		list = data.rParam[0];
+		for (ListNode *curr = list; curr; curr = nextNode(list, curr)) {
+			checkStatement(&(curr->data), 0);
+		}
+		break;
+
+	case T_CALL:
+		if (!checkUndeclaredFunc(&data)) {
+			break;
+		}
+
+		YYNode *declFunc = findFromHashTable(&symbolTable, data.sParam[0]);
+		if (data.iParam[1] != declFunc->iParam[1]) {
+			// 인자 개수 다름 - 오류 처리
+			sprintf(buf, "\"%s\" expect %d parameter, but %d given", data.sParam[0], declFunc->iParam[1], data.iParam[1]);
+			_yyerror(buf, data.iParam[0]);
+		}
+		break;
+
+	}
+
+	return 1;
+}
+
+int checkExpression(YYNode *_node) {
+	if (_node->type == T_SIMPLE_EXPR) {
+		return checkSimpleExpression(_node, 0);
+	}
+	else if (_node->type == T_RELOP_EXPR || _node->type == T_IN_EXPR) {
+		int x = checkSimpleExpression(_node->rParam[0], 0);
+		int y;
+		if (_node->type == T_RELOP_EXPR){
+			checkSimpleExpression(_node->rParam[1], 0);
+		}
+		else {
+			checkSimpleExpression(_node->rParam[1], 1);
+		}
+
+		if (_node->type == T_IN_EXPR && _node->iParam[2] == L_VALUE) {
+			ListNode rNode = *((ListNode*)_node->rParam[1]);
+			YYNode *declVar = findVariable(rNode.data.sParam[0]);
+			if (declVar && declVar->type == T_VAR) {
+				// IN 오른쪽에 단일 변수 사용한 오류 (배열만 사용 가능) - 오류 처리
+				sprintf(buf, "expect an array on the right side of \"in\", but a single variable \"%s\" given", rNode.data.sParam[0]);
+				_yyerror(buf, rNode.data.iParam[0]);
+				return 0;
+			}
+		}
+
+		return x && y;
+	}
+
+	return 1;
+}
+
+int checkSimpleExpression(YYNode *_node, int canArrayInExpr) {
+	int ok = 1;
+
+	List terms = _node->rParam[0];
+	for (ListNode *curr = terms; curr; curr = nextNode(terms, curr)) {
+		YYNode *data = &(curr->data);
+		YYNode *declVar;
+
+		switch (data->type) {
+		case T_VAR_USING:
+			if (!checkUndeclaredVar(data)) {
+				ok = 0;
+				break;
+			}
+
+			declVar = findVariable(data->sParam[0]);
+			if (!canArrayInExpr && declVar->type == T_ARRAY) {
+				// 배열 전체를 인덱스 참조 없이 단일 변수처럼 사용한 오류 - 오류 처리
+				ok = 0;
+				sprintf(buf, "can't use the array \"%s\" directly/entirely here. please use an index", data->sParam[0]);
+				_yyerror(buf, data->iParam[0]);
+			}
+			break;
+
+		case T_ARRAY_USING:
+			if (!checkUndeclaredVar(data)) {
+				ok = 0;
+				break;
+			}
+
+			declVar = findVariable(data->sParam[0]);
+			if (declVar->type == T_VAR) {
+				// 단일 변수를 배열처럼 인덱스 참조한 오류 - 오류 처리
+				ok = 0;
+				sprintf(buf, "can't indexing the single variable \"%s\"", data->sParam[0]);
+				_yyerror(buf, data->iParam[0]);
+			}
+			break;
+
+		case T_CALL:
+			if (!checkUndeclaredFunc(data)) {
+				ok = 0;
+				break;
+			}
+
+			YYNode *declFunc = findFromHashTable(&symbolTable, data->sParam[0]);
+			if (declFunc->type != T_FUNCTION) {
+				// function이 아님. 리턴값이 없어 expression에서 사용 불가능 - 오류 처리
+				ok = 0;
+				sprintf(buf, "\"%s\" is not function so it doesn't have return value", data->sParam[0]);
+				_yyerror(buf, data->iParam[0]);
+			}
+
+			if (data->iParam[1] != declFunc->iParam[1]) {
+				// 인자 개수 다름 - 오류 처리
+				ok = 0;
+				sprintf(buf, "\"%s\" expect %d parameter, but %d given", data->sParam[0], declFunc->iParam[1], data->iParam[1]);
+				_yyerror(buf, data->iParam[0]);
+			}
+			break;
+		}
+	}
+
+	return ok;
+}
 
 int yyerror(char *s) {
-	_yyerror(s, yylineno);
+	return _yyerror(s, yylineno);
 }
 
 int _yyerror(char *s, int yylineno) {
-	printf("Error: %s at line %d\n", s, yylineno);
+	YYNode node = {0};
+	node.type = T_ERROR;
+	node.iParam[0] = yylineno;
+	node.sParam[0] = malloc(BUF_SIZE);
+	strcpy(node.sParam[0], s);
+	appendToList(&(errorList), node);
 	errorCount++;
 	return 0;
 }
 
+void printAllError() {
+	sortList(errorList);
+	ListNode *curr = errorList;
+
+	while (curr) {
+		if (curr->data.type == T_ERROR) {
+			printf("Error (line %d) : %s\n", curr->data.iParam[0], curr->data.sParam[0]);
+		}
+
+		ListNode *temp = curr;
+		curr = nextNode(errorList, curr);
+		removeFromList(&(errorList), temp);
+	}
+}
+
 void prepareParse() {
 	symbolTable = createHashTable();
+	globalVarTable = createHashTable();
+	paramSymbolTable = createHashTable();
+	localSymbolTable = createHashTable();
 }
 
 int main(int argc, char *argv[]) {
@@ -2656,7 +3111,9 @@ int main(int argc, char *argv[]) {
 		yyin = fopen(argv[1], "r");
 		if (yyin) {
 			prepareParse();
-			if (yyparse() == 0) {
+			int parsed = yyparse();
+			printAllError();
+			if (parsed == 0) {
 				if (errorCount == 0) {
 					printf("[Compile OK]\n");
 				}
