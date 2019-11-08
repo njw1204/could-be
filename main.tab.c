@@ -3071,7 +3071,15 @@ void printAllError() {
 
 	while (curr) {
 		if (curr->data.type == T_ERROR) {
-			printf("Error (line %d) : %s\n", curr->data.iParam[0], curr->data.sParam[0]);
+			if (strstr(curr->data.sParam[0], "$undefined")) {
+				printf("Error (line %d) : syntax error, found unknown character while parsing\n", curr->data.iParam[0]);
+			}
+			else if (strstr(curr->data.sParam[0], "$end")) {
+				printf("Error (line %d) : syntax error, reached end of file while parsing\n", curr->data.iParam[0]);
+			}
+			else {
+				printf("Error (line %d) : %s\n", curr->data.iParam[0], curr->data.sParam[0]);
+			}
 		}
 
 		ListNode *temp = curr;
