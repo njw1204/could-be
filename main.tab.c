@@ -81,9 +81,9 @@ void prepareParse();
 YYNode *findVariable(const char *name);
 int checkUndeclaredVar(YYNode *_node);
 int checkUndeclaredFunc(YYNode *_node);
-int checkStatement(YYNode *_node, int allowCompound);
-int checkExpression(YYNode *_node);
-int checkSimpleExpression(YYNode *_node, int canArrayInExpr);
+void checkStatement(YYNode *_node, int allowCompound);
+void checkExpression(YYNode *_node);
+void checkSimpleExpression(YYNode *_node, int canArrayInExpr);
 extern int yylineno;
 
 #define L_VALUE 1
@@ -2810,7 +2810,7 @@ int checkUndeclaredFunc(YYNode *_node) {
 	return 1;
 }
 
-int checkStatement(YYNode *_node, int allowCompound) {
+void checkStatement(YYNode *_node, int allowCompound) {
 	YYNode data = *_node;
 
 	YYNode left, right, begin, end;
@@ -2968,18 +2968,15 @@ int checkStatement(YYNode *_node, int allowCompound) {
 		break;
 
 	}
-
-	return 1;
 }
 
-int checkExpression(YYNode *_node) {
+void checkExpression(YYNode *_node) {
 	if (_node->type == T_SIMPLE_EXPR) {
-		return checkSimpleExpression(_node, 0);
+		checkSimpleExpression(_node, 0);
 	}
 	else if (_node->type == T_RELOP_EXPR || _node->type == T_IN_EXPR) {
-		int x = checkSimpleExpression(_node->rParam[0], 0);
-		int y;
-		if (_node->type == T_RELOP_EXPR){
+		checkSimpleExpression(_node->rParam[0], 0);
+		if (_node->type == T_RELOP_EXPR) {
 			checkSimpleExpression(_node->rParam[1], 0);
 		}
 		else {
@@ -2993,19 +2990,12 @@ int checkExpression(YYNode *_node) {
 				// IN 오른쪽에 단일 변수 사용한 오류 (배열만 사용 가능) - 오류 처리
 				sprintf(buf, "expect an array on the right side of \"in\", but a single variable \"%s\" given", rNode.data.sParam[0]);
 				_yyerror(buf, rNode.data.iParam[0]);
-				return 0;
 			}
 		}
-
-		return x && y;
 	}
-
-	return 1;
 }
 
-int checkSimpleExpression(YYNode *_node, int canArrayInExpr) {
-	int ok = 1;
-
+void checkSimpleExpression(YYNode *_node, int canArrayInExpr) {
 	List terms = _node->rParam[0];
 	for (ListNode *curr = terms; curr; curr = nextNode(terms, curr)) {
 		YYNode *data = &(curr->data);
@@ -3014,14 +3004,12 @@ int checkSimpleExpression(YYNode *_node, int canArrayInExpr) {
 		switch (data->type) {
 		case T_VAR_USING:
 			if (!checkUndeclaredVar(data)) {
-				ok = 0;
 				break;
 			}
 
 			declVar = findVariable(data->sParam[0]);
 			if (!canArrayInExpr && declVar->type == T_ARRAY) {
 				// 배열 전체를 인덱스 참조 없이 단일 변수처럼 사용한 오류 - 오류 처리
-				ok = 0;
 				sprintf(buf, "can't use the array \"%s\" directly/entirely here. please use an index", data->sParam[0]);
 				_yyerror(buf, data->iParam[0]);
 			}
@@ -3029,14 +3017,12 @@ int checkSimpleExpression(YYNode *_node, int canArrayInExpr) {
 
 		case T_ARRAY_USING:
 			if (!checkUndeclaredVar(data)) {
-				ok = 0;
 				break;
 			}
 
 			declVar = findVariable(data->sParam[0]);
 			if (declVar->type == T_VAR) {
 				// 단일 변수를 배열처럼 인덱스 참조한 오류 - 오류 처리
-				ok = 0;
 				sprintf(buf, "can't indexing the single variable \"%s\"", data->sParam[0]);
 				_yyerror(buf, data->iParam[0]);
 			}
@@ -3044,29 +3030,24 @@ int checkSimpleExpression(YYNode *_node, int canArrayInExpr) {
 
 		case T_CALL:
 			if (!checkUndeclaredFunc(data)) {
-				ok = 0;
 				break;
 			}
 
 			YYNode *declFunc = findFromHashTable(&symbolTable, data->sParam[0]);
 			if (declFunc->type != T_FUNCTION) {
 				// function이 아님. 리턴값이 없어 expression에서 사용 불가능 - 오류 처리
-				ok = 0;
 				sprintf(buf, "\"%s\" is not function so it doesn't have return value", data->sParam[0]);
 				_yyerror(buf, data->iParam[0]);
 			}
 
 			if (data->iParam[1] != declFunc->iParam[1]) {
 				// 인자 개수 다름 - 오류 처리
-				ok = 0;
 				sprintf(buf, "\"%s\" expect %d parameter, but %d given", data->sParam[0], declFunc->iParam[1], data->iParam[1]);
 				_yyerror(buf, data->iParam[0]);
 			}
 			break;
 		}
 	}
-
-	return ok;
 }
 
 int yyerror(char *s) {
