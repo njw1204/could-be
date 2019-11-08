@@ -1,0 +1,10 @@
+mainprog error1;
+
+function plus(x: int; y: int):   ;
+	begin
+		return x+y
+	end
+
+begin
+    print(plus(1,3))
+end

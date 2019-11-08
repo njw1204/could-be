@@ -23,8 +23,15 @@ function muchul (sex:int;fuck:float;fuckfuckfuck:int) : int;
 			end
 	end
 
+function plus(x: int; y: int): int;
+	begin
+		return x+y
+	end
+
 begin
+	print(plus(32094,-1384));
 	print(e1[e1[3*e1[e1[e1[e1[e1[50]-2]]]+1]]]);
+
 	for muchul2 in z123:
 	begin
 		fuckfuckfuck = a + b * c - d / efg01230[1];
