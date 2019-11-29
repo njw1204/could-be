@@ -587,28 +587,6 @@ procedure_statement:
 		$$.sParam[0] = malloc(BUF_SIZE);
 		strcpy($$.sParam[0], $1);
 		$$.rParam[0] = $3;
-
-		/*
-		if (nodePtr == NULL) {
-			sprintf(buf, "undeclared subprogram \"%s\"", $1);
-			yyerror(buf);
-			$$.type = T_FUNCTION_CALL;
-		}
-		else if (nodePtr->type != T_FUNCTION && nodePtr->type != T_PROCEDURE) {
-			sprintf(buf, "\"%s\" is not function or procedure", $1);
-			yyerror(buf);
-			$$.type = T_FUNCTION_CALL;
-		}
-		else if (nodePtr->iParam[1] != paraLen) {
-			sprintf(buf, "\"%s\" expect %d parameter, but %d given", $1, nodePtr->iParam[1], paraLen);
-			yyerror(buf);
-			$$.type = T_FUNCTION_CALL;
-		}
-		else {
-			if (nodePtr->type == T_FUNCTION) $$.type = T_FUNCTION_CALL;
-			else $$.type = T_PROCEDURE_CALL;
-		}
-		*/
 	}
 ;
 actual_parameter_expression:
@@ -657,16 +635,16 @@ in_expression:
 
 		int llistLen = lengthOfList($1.rParam[0]), rlistLen = lengthOfList($3.rParam[0]);
 		if (rlistLen > 1) {
-			// IN 우항은 무조건 r-value - 오류 처리
-			sprintf(buf, "expect l-value on the right side of \"in\", but r-value given");
+			// IN 우항은 무조건 l-value(배열) - 오류 처리
+			sprintf(buf, "expect an array on the right side of \"in\", but an expression given");
 			yyerror(buf);
 			$$.iParam[2] = R_VALUE;
 		}
 		else {
 			ListNode rNode = *((ListNode*)$3.rParam[0]);
 			if (rNode.data.type != T_VAR_USING) {
-				// IN 우항은 무조건 r-value - 오류 처리
-				sprintf(buf, "expect l-value on the right side of \"in\", but r-value given");
+				// IN 우항은 무조건 l-value(배열) - 오류 처리
+				sprintf(buf, "expect an array on the right side of \"in\"");
 				yyerror(buf);
 				$$.iParam[2] = R_VALUE;
 			}
@@ -857,7 +835,7 @@ void checkStatement(YYNode *_node, int allowCompound) {
 		if (declLeft) {
 			if (left.type == T_VAR_USING && declLeft->type == T_ARRAY) {
 				// 배열 전체에 직접 대입 - 오류 처리
-				sprintf(buf, "can't assign directly/entirely to the array \"%s\". please use an index", left.sParam[0]);
+				sprintf(buf, "can't assign data directly/entirely to the array \"%s\". please use an index", left.sParam[0]);
 				_yyerror(buf, left.iParam[0]);
 			}
 			else if (left.type == T_ARRAY_USING && declLeft->type == T_VAR) {
@@ -973,7 +951,7 @@ void checkStatement(YYNode *_node, int allowCompound) {
 	case T_COMPOUND:
 		if (!allowCompound) {
 			// BEGIN~END문은 연속 중첩 불가능 (if, for문 등의 아래에 나와야 함) - 오류 처리
-			sprintf(buf, "begin~end statement can't be nested directly here");
+			sprintf(buf, "begin~end statement can't be nested directly under another begin~end statement");
 			_yyerror(buf, data.iParam[0]);
 		}
 
@@ -1039,7 +1017,7 @@ void checkSimpleExpression(YYNode *_node, int canArrayInExpr) {
 			declVar = findVariable(data->sParam[0]);
 			if (!canArrayInExpr && declVar->type == T_ARRAY) {
 				// 배열 전체를 인덱스 참조 없이 단일 변수처럼 사용한 오류 - 오류 처리
-				sprintf(buf, "can't use the array \"%s\" directly/entirely here. please use an index", data->sParam[0]);
+				sprintf(buf, "can't reference the array \"%s\" directly/entirely here. please use an index", data->sParam[0]);
 				_yyerror(buf, data->iParam[0]);
 			}
 			break;

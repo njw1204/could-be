@@ -13,7 +13,7 @@ function dfs(si: int; sj: int; hihihihihi: float; sj: float): float;
 
 	begin
 		x=.12;
-		MyVariable=couldbe(1,2);
+		MyVariable=cdb(1,2);
 
 		for 12345 in hi2:
 			begin
@@ -45,7 +45,7 @@ function dfs(si: int; sj: int; hihihihihi: float; sj: float): float;
 		print(0)
 	end
 
-procedure couldbe(pa1: int);
+procedure cdb(pa1: int);
 	begin
 		return 12*1-9/222+9
 	end
@@ -78,7 +78,7 @@ begin
 		nop
 	end;
 
-	hi = couldbe(100);
+	hi = cdb(100);
 	e1 = hi;
 
 	for hi in e1[0]+93939+14+e1[0]-1349*14:

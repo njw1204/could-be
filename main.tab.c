@@ -520,10 +520,10 @@ static const yytype_uint16 yyrline[] =
      283,   288,   293,   296,   309,   319,   331,   332,   335,   347,
      364,   372,   376,   383,   392,   393,   394,   395,   396,   397,
      398,   405,   413,   423,   435,   446,   461,   476,   494,   505,
-     521,   531,   547,   552,   564,   570,   580,   615,   616,   619,
-     623,   632,   639,   640,   654,   698,   703,   714,   718,   725,
-     731,   737,   740,   743,   758,   773,   774,   777,   778,   779,
-     780,   781,   782,   785,   786,   789,   790
+     521,   531,   547,   552,   564,   570,   580,   593,   594,   597,
+     601,   610,   617,   618,   632,   676,   681,   692,   696,   703,
+     709,   715,   718,   721,   736,   751,   752,   755,   756,   757,
+     758,   759,   760,   763,   764,   767,   768
 };
 #endif
 
@@ -2188,49 +2188,27 @@ yyreduce:
 		(yyval.nodeData).sParam[0] = malloc(BUF_SIZE);
 		strcpy((yyval.nodeData).sParam[0], (yyvsp[(1) - (4)].name));
 		(yyval.nodeData).rParam[0] = (yyvsp[(3) - (4)].nodeList);
-
-		/*
-		if (nodePtr == NULL) {
-			sprintf(buf, "undeclared subprogram \"%s\"", $1);
-			yyerror(buf);
-			$$.type = T_FUNCTION_CALL;
-		}
-		else if (nodePtr->type != T_FUNCTION && nodePtr->type != T_PROCEDURE) {
-			sprintf(buf, "\"%s\" is not function or procedure", $1);
-			yyerror(buf);
-			$$.type = T_FUNCTION_CALL;
-		}
-		else if (nodePtr->iParam[1] != paraLen) {
-			sprintf(buf, "\"%s\" expect %d parameter, but %d given", $1, nodePtr->iParam[1], paraLen);
-			yyerror(buf);
-			$$.type = T_FUNCTION_CALL;
-		}
-		else {
-			if (nodePtr->type == T_FUNCTION) $$.type = T_FUNCTION_CALL;
-			else $$.type = T_PROCEDURE_CALL;
-		}
-		*/
 	;}
     break;
 
   case 47:
 
 /* Line 1455 of yacc.c  */
-#line 615 "main.y"
+#line 593 "main.y"
     { (yyval.nodeList) = (yyvsp[(1) - (1)].nodeList); ;}
     break;
 
   case 48:
 
 /* Line 1455 of yacc.c  */
-#line 616 "main.y"
+#line 594 "main.y"
     { (yyval.nodeList) = createList(); ;}
     break;
 
   case 49:
 
 /* Line 1455 of yacc.c  */
-#line 619 "main.y"
+#line 597 "main.y"
     {
 		(yyval.nodeList) = createList();
 		appendToList(&((yyval.nodeList)), (yyvsp[(1) - (1)].nodeData));
@@ -2240,7 +2218,7 @@ yyreduce:
   case 50:
 
 /* Line 1455 of yacc.c  */
-#line 623 "main.y"
+#line 601 "main.y"
     {
 		(yyval.nodeList) = createList();
 		appendToList(&((yyval.nodeList)), (yyvsp[(1) - (3)].nodeData));
@@ -2251,7 +2229,7 @@ yyreduce:
   case 51:
 
 /* Line 1455 of yacc.c  */
-#line 632 "main.y"
+#line 610 "main.y"
     {
 		(yyval.nodeData) = (yyvsp[(1) - (1)].nodeData);
 
@@ -2264,14 +2242,14 @@ yyreduce:
   case 52:
 
 /* Line 1455 of yacc.c  */
-#line 639 "main.y"
+#line 617 "main.y"
     { (yyval.nodeData) = (yyvsp[(1) - (1)].nodeData); ;}
     break;
 
   case 53:
 
 /* Line 1455 of yacc.c  */
-#line 640 "main.y"
+#line 618 "main.y"
     {
 		(yyval.nodeData).type = T_RELOP_EXPR;
 		(yyval.nodeData).iParam[0] = yylineno;
@@ -2289,23 +2267,23 @@ yyreduce:
   case 54:
 
 /* Line 1455 of yacc.c  */
-#line 654 "main.y"
+#line 632 "main.y"
     {
 		(yyval.nodeData) = ZERO_NODE;
 		(yyval.nodeData).iParam[2] = L_VALUE; // right l-value
 
 		int llistLen = lengthOfList((yyvsp[(1) - (3)].nodeData).rParam[0]), rlistLen = lengthOfList((yyvsp[(3) - (3)].nodeData).rParam[0]);
 		if (rlistLen > 1) {
-			// IN 우항은 무조건 r-value - 오류 처리
-			sprintf(buf, "expect l-value on the right side of \"in\", but r-value given");
+			// IN 우항은 무조건 l-value(배열) - 오류 처리
+			sprintf(buf, "expect an array on the right side of \"in\", but an expression given");
 			yyerror(buf);
 			(yyval.nodeData).iParam[2] = R_VALUE;
 		}
 		else {
 			ListNode rNode = *((ListNode*)(yyvsp[(3) - (3)].nodeData).rParam[0]);
 			if (rNode.data.type != T_VAR_USING) {
-				// IN 우항은 무조건 r-value - 오류 처리
-				sprintf(buf, "expect l-value on the right side of \"in\", but r-value given");
+				// IN 우항은 무조건 l-value(배열) - 오류 처리
+				sprintf(buf, "expect an array on the right side of \"in\"");
 				yyerror(buf);
 				(yyval.nodeData).iParam[2] = R_VALUE;
 			}
@@ -2337,7 +2315,7 @@ yyreduce:
   case 55:
 
 /* Line 1455 of yacc.c  */
-#line 698 "main.y"
+#line 676 "main.y"
     {
 		(yyval.nodeData).type = T_SIMPLE_EXPR;
 		(yyval.nodeData).iParam[0] = yylineno;
@@ -2348,7 +2326,7 @@ yyreduce:
   case 56:
 
 /* Line 1455 of yacc.c  */
-#line 703 "main.y"
+#line 681 "main.y"
     {
 		(yyval.nodeData).type = T_SIMPLE_EXPR;
 		(yyval.nodeData).iParam[0] = yylineno;
@@ -2363,7 +2341,7 @@ yyreduce:
   case 57:
 
 /* Line 1455 of yacc.c  */
-#line 714 "main.y"
+#line 692 "main.y"
     {
 		(yyval.nodeList) = createList();
 		appendToList(&((yyval.nodeList)), (yyvsp[(1) - (1)].nodeData));
@@ -2373,7 +2351,7 @@ yyreduce:
   case 58:
 
 /* Line 1455 of yacc.c  */
-#line 718 "main.y"
+#line 696 "main.y"
     {
 		(yyval.nodeList) = createList();
 		appendToList(&((yyval.nodeList)), (yyvsp[(1) - (3)].nodeData));
@@ -2384,7 +2362,7 @@ yyreduce:
   case 59:
 
 /* Line 1455 of yacc.c  */
-#line 725 "main.y"
+#line 703 "main.y"
     {
 		(yyval.nodeData) = ZERO_NODE;
 		(yyval.nodeData).type = T_CONST_INTEGER;
@@ -2396,7 +2374,7 @@ yyreduce:
   case 60:
 
 /* Line 1455 of yacc.c  */
-#line 731 "main.y"
+#line 709 "main.y"
     {
 		(yyval.nodeData) = ZERO_NODE;
 		(yyval.nodeData).type = T_CONST_FLOAT;
@@ -2408,7 +2386,7 @@ yyreduce:
   case 61:
 
 /* Line 1455 of yacc.c  */
-#line 737 "main.y"
+#line 715 "main.y"
     {
 		(yyval.nodeData) = (yyvsp[(1) - (1)].nodeData); // variable (nodeData, type : T_VAR_USING or T_ARRAY_USING)
 	;}
@@ -2417,7 +2395,7 @@ yyreduce:
   case 62:
 
 /* Line 1455 of yacc.c  */
-#line 740 "main.y"
+#line 718 "main.y"
     {
 		(yyval.nodeData) = (yyvsp[(1) - (1)].nodeData);
 	;}
@@ -2426,7 +2404,7 @@ yyreduce:
   case 63:
 
 /* Line 1455 of yacc.c  */
-#line 743 "main.y"
+#line 721 "main.y"
     {
 		(yyval.nodeData).iParam[0] = yylineno;
 		if ((yyvsp[(2) - (2)].nodeData).type == T_CONST_INTEGER || (yyvsp[(2) - (2)].nodeData).type == T_CONST_FLOAT) {
@@ -2447,7 +2425,7 @@ yyreduce:
   case 64:
 
 /* Line 1455 of yacc.c  */
-#line 758 "main.y"
+#line 736 "main.y"
     {
 		(yyval.nodeData).iParam[0] = yylineno;
 		if ((yyvsp[(2) - (2)].nodeData).type == T_CONST_INTEGER || (yyvsp[(2) - (2)].nodeData).type == T_CONST_FLOAT) {
@@ -2464,91 +2442,91 @@ yyreduce:
   case 65:
 
 /* Line 1455 of yacc.c  */
-#line 773 "main.y"
+#line 751 "main.y"
     {;}
     break;
 
   case 66:
 
 /* Line 1455 of yacc.c  */
-#line 774 "main.y"
+#line 752 "main.y"
     {;}
     break;
 
   case 67:
 
 /* Line 1455 of yacc.c  */
-#line 777 "main.y"
+#line 755 "main.y"
     {;}
     break;
 
   case 68:
 
 /* Line 1455 of yacc.c  */
-#line 778 "main.y"
+#line 756 "main.y"
     {;}
     break;
 
   case 69:
 
 /* Line 1455 of yacc.c  */
-#line 779 "main.y"
+#line 757 "main.y"
     {;}
     break;
 
   case 70:
 
 /* Line 1455 of yacc.c  */
-#line 780 "main.y"
+#line 758 "main.y"
     {;}
     break;
 
   case 71:
 
 /* Line 1455 of yacc.c  */
-#line 781 "main.y"
+#line 759 "main.y"
     {;}
     break;
 
   case 72:
 
 /* Line 1455 of yacc.c  */
-#line 782 "main.y"
+#line 760 "main.y"
     {;}
     break;
 
   case 73:
 
 /* Line 1455 of yacc.c  */
-#line 785 "main.y"
+#line 763 "main.y"
     {;}
     break;
 
   case 74:
 
 /* Line 1455 of yacc.c  */
-#line 786 "main.y"
+#line 764 "main.y"
     {;}
     break;
 
   case 75:
 
 /* Line 1455 of yacc.c  */
-#line 789 "main.y"
+#line 767 "main.y"
     {;}
     break;
 
   case 76:
 
 /* Line 1455 of yacc.c  */
-#line 790 "main.y"
+#line 768 "main.y"
     {;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 2552 "main.tab.c"
+#line 2530 "main.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -2760,7 +2738,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 793 "main.y"
+#line 771 "main.y"
 
 
 YYNode *findVariable(const char *name) {
@@ -2828,7 +2806,7 @@ void checkStatement(YYNode *_node, int allowCompound) {
 		if (declLeft) {
 			if (left.type == T_VAR_USING && declLeft->type == T_ARRAY) {
 				// 배열 전체에 직접 대입 - 오류 처리
-				sprintf(buf, "can't assign directly/entirely to the array \"%s\". please use an index", left.sParam[0]);
+				sprintf(buf, "can't assign data directly/entirely to the array \"%s\". please use an index", left.sParam[0]);
 				_yyerror(buf, left.iParam[0]);
 			}
 			else if (left.type == T_ARRAY_USING && declLeft->type == T_VAR) {
@@ -2944,7 +2922,7 @@ void checkStatement(YYNode *_node, int allowCompound) {
 	case T_COMPOUND:
 		if (!allowCompound) {
 			// BEGIN~END문은 연속 중첩 불가능 (if, for문 등의 아래에 나와야 함) - 오류 처리
-			sprintf(buf, "begin~end statement can't be nested directly here");
+			sprintf(buf, "begin~end statement can't be nested directly under another begin~end statement");
 			_yyerror(buf, data.iParam[0]);
 		}
 
@@ -3010,7 +2988,7 @@ void checkSimpleExpression(YYNode *_node, int canArrayInExpr) {
 			declVar = findVariable(data->sParam[0]);
 			if (!canArrayInExpr && declVar->type == T_ARRAY) {
 				// 배열 전체를 인덱스 참조 없이 단일 변수처럼 사용한 오류 - 오류 처리
-				sprintf(buf, "can't use the array \"%s\" directly/entirely here. please use an index", data->sParam[0]);
+				sprintf(buf, "can't reference the array \"%s\" directly/entirely here. please use an index", data->sParam[0]);
 				_yyerror(buf, data->iParam[0]);
 			}
 			break;
